@@ -1,17 +1,16 @@
 #version 330 core
 
 // Input vertex data, different for all executions of this shader.
-layout(location = 0) in vec2 vertexPosition_modelspace;//XY
-layout(location = 1) in vec3 vertexColor;//RGB
+layout(location = 0) in vec2 vertexPosition_modelspace; //XY
+layout(location = 1) in vec3 vertexColor; //RGB
 
 // out colorVertex FragmenteShader
 out vec3 fragmentColor;
 
-
-void main(){
-    	gl_Position.xy = vertexPosition_modelspace ;
-    	gl_Position.z = 0;
-    	gl_Position.w = 1; //1 - Ponto, 0 - Vetor
-    	fragmentColor = vertexColor;
+void main ()
+{
+    gl_Position.xy = vertexPosition_modelspace;
+    gl_Position.z = 0;
+    gl_Position.w = 1; // 1 - Ponto, 0 - Vetor
+    fragmentColor = vertexColor;
 }
-

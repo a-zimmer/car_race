@@ -5,12 +5,12 @@
 
 CPPSOURCES = $(wildcard *.cpp)
 
-Target: trianguloCor
+Target: carRace
 
 all:	Target
 
-trianguloCor: $(CPPSOURCES:.cpp=.o)
+carRace: $(CPPSOURCES:.cpp=.o)
 	g++ $< common/shader.cpp -o $@ -lglfw -lGLEW -lGL
 
 run:
-	./trianguloCor
+	./carRace
