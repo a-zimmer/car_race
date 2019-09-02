@@ -9,7 +9,7 @@ out vec3 fragmentColor;
 
 void main ()
 {
-    gl_Position.xy = vertexPosition_modelspace;
+    gl_Position.xy = (vertexPosition_modelspace/10);
     gl_Position.z = 0;
     gl_Position.w = 1; // 1 - Ponto, 0 - Vetor
     fragmentColor = vertexColor;
