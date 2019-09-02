@@ -124,6 +124,7 @@ int main(void)
 
 		glDisableVertexAttribArray(0);
 		glfwSwapBuffers(window);
+		glfwPollEvents();
 
 	}while(glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS
 		&& !glfwWindowShouldClose(window));
