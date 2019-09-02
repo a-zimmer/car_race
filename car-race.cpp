@@ -78,145 +78,14 @@ int main(void)
 
 	//Array que representa as coordenadas x e y de um triangulo
 	static const GLfloat vertex_buffer_data_triangle[] = {
-		// Cintura
-		-0.05f, 0.00f,
-		0.05f, 0.00f,
-		0.00f,  -0.04f,
-
-		// Barriga (lado esquerdo)
-		-0.05f, 0.00f,
-		-0.05f, 0.04f,
-		0.00f,  0.04f,
-
-		-0.05f, 0.00f,
-		0.00f, 0.00f,
-		0.00f,  0.04f,
-
-		// Barriga (lado direito)
-		0.05f, 0.00f,
-		0.05f, 0.04f,
-		0.00f,  0.04f,
-
-		0.05f, 0.00f,
-		0.00f, 0.00f,
-		0.00f,  0.04f,
-
-		// Tórax (lado esquerdo)
-		-0.06f, 0.04f,
-		-0.06f, 0.10f,
-		0.00f,  0.10f,
-
-		-0.06f, 0.04f,
-		0.00f, 0.04f,
-		0.00f,  0.10f,
-
-		// Tórax (lado direito)
-		0.06f, 0.04f,
-		0.06f, 0.10f,
-		0.00f,  0.10f,
-
-		0.06f, 0.04f,
-		0.00f, 0.04f,
-		0.00f,  0.10f,
-
-		// Cabeça
-		-0.03f, 0.10f,
-		-0.03f, 0.16f,
-		0.03f,  0.16f,
-
-		0.03f, 0.10f,
-		0.03f, 0.16f,
-		-0.03f,  0.10f,
-
-		// Ombro esquerdo
-		-0.065f, 0.07f,
-		-0.10f, 0.07f,
-		-0.065f,  0.11f,
-
-		-0.10f, 0.11f,
-		-0.10f, 0.07f,
-		-0.065f,  0.11f,
-
-		// Ombro direito
-		0.065f, 0.07f,
-		0.10f, 0.07f,
-		0.065f,  0.11f,
-
-		0.10f, 0.11f,
-		0.10f, 0.07f,
-		0.065f,  0.11f,
-
-		// Braço esquerdo
-		-0.07f, 0.07f,
-		-0.07f, 0.00f,
-		-0.095f,  0.07f,
-
-		-0.095f,  0.07f,
-		-0.07f, 0.00f,
-		-0.095f,  0.00f,
-
-		// Braço direito
-		0.07f, 0.07f,
-		0.07f, 0.00f,
-		0.095f,  0.07f,
-
-		0.095f,  0.07f,
-		0.07f, 0.00f,
-		0.095f,  0.00f,
-
-		// Mão esquerda
-		-0.07f, 0.00f,
-		-0.095f, 0.00f,
-		-0.07f,  -0.02f,
-
-		// Mão direita
-		0.07f, 0.00f,
-		0.095f, 0.00f,
-		0.07f,  -0.02f,
-
-		// Perna esquerda
-		-0.04f, -0.005f,
-		-0.04f, -0.04f,
-		-0.0025f,  -0.035f,
-
-		-0.04f, -0.035f,
-		-0.04f, -0.17f,
-		-0.0025f,  -0.035f,
-
-		-0.0025f, -0.17f,
-		-0.04f, -0.17f,
-		-0.0025f,  -0.035f,
-
-		// Perna direita
-		0.04f, -0.005f,
-		0.04f, -0.04f,
-		0.0025f,  -0.035f,
-
-		0.04f, -0.035f,
-		0.04f, -0.17f,
-		0.0025f,  -0.035f,
-
-		0.0025f, -0.17f,
-		0.04f, -0.17f,
-		0.0025f,  -0.035f,
-
-		// Pé esquerdo
-		-0.06f, -0.17f,
-		-0.06f, -0.20f,
-		-0.0025f, -0.17f,
-
-		-0.0025f, -0.17f,
-		-0.0025f, -0.20f,
-		-0.06f, -0.20f,
-
-		// Pé direito
-		0.06f, -0.17f,
-		0.06f, -0.20f,
-		0.0025f, -0.17f,
-
-		0.0025f, -0.17f,
-		0.0025f, -0.20f,
-		0.06f, -0.20f
+		// Body
+		-2.0f,0.0f,//A
+		-2.0f,-4.0f,//C
+		 0.0f,-4.0f,//D
+		 //2
+		-2.0f,0.0f,//A
+		0.0f,0.0f, //B	
+		0.0f,-4.0f,//D
 	};
 
 	//Gerar 1 buffer, colocar o identificador resultante em vertexbuffer
@@ -256,8 +125,8 @@ int main(void)
 		glDisableVertexAttribArray(0);
 		glfwSwapBuffers(window);
 
-	} while(!glfwWindowShouldClose(window));
-
+	}while(glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS
+		&& !glfwWindowShouldClose(window));
 	destroyWindows(vertexbuffer, VertexArrayID, programID);
 	return 0;
 }
