@@ -2,4 +2,4 @@
 Clássico Jogo de Corrida de Carros da Brick Game (Computação Gráfica I)
 
 
-[Coordenadas Pista:](https://www.geogebra.org/m/ev59ft87)
+[Coordenadas Pista](https://www.geogebra.org/m/ev59ft87)
