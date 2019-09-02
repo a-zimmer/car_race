@@ -78,14 +78,41 @@ int main(void)
 
 	//Array que representa as coordenadas x e y de um triangulo
 	static const GLfloat vertex_buffer_data_triangle[] = {
+			    /*Car 1*/
 		// Body
-		-2.0f,0.0f,//A
-		-2.0f,-4.0f,//C
-		 0.0f,-4.0f,//D
+		-10.0f,10.0f,//A
+		-10.0f,-10.0f,//H
+		 0.0f,-10.0f,//I
 		 //2
-		-2.0f,0.0f,//A
-		0.0f,0.0f, //B	
-		0.0f,-4.0f,//D
+		-10.0f,10.0f,//A
+		 0.0f,10.0f,//B	
+		 0.0f,-10.0f,//I
+
+		//Perna
+		-20.0f,-10.0f,//M
+		-20.0f,-20.0f,//J
+		 10.0f,-20.0f,//K
+		 //2
+		-20.0f,-10.0f,//M
+		 10.0f,-10.0f,//L
+		 10.0f,-20.0f,//K
+
+		 //Braços
+		-20.0f,10.0f,//D
+		-20.0f,0.0f,//E
+		 10.0f,0.0f,//G
+		 //2
+		-20.0f,10.0f,//D
+		 10.0f,10.0f,//F
+		 10.0f,0.0f,//G
+		 //Head
+		-15.0f,10.0f,//A
+		-5.0f,25.0f,//C
+		 5.0f,10.0f,//B
+		 //?
+		 -20.0f,-20.0f,//J
+		 -5.0f,-30.0f,//N
+		 10.0f,-20.0f,//K
 	};
 
 	//Gerar 1 buffer, colocar o identificador resultante em vertexbuffer
