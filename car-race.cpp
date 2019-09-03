@@ -1,3 +1,4 @@
+#include <bits/stdc++.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -10,12 +11,15 @@ GLFWwindow* window;
 
 // Include GLM
 #include <glm/glm.hpp>
+#include </usr/include/glm/gtc/matrix_transform.hpp>
 using namespace glm;
 
 #include "common/shader.hpp"
 
 const GLint WIDTH = 1280, HEIGHT = 768;
 const GLfloat R = 0.0f, G = 0.0f, B = 0.3f, A = 0.0f;
+GLuint colorbuffer;
+GLuint vertexbuffer;
 
 int initWindow ()
 {
@@ -65,20 +69,59 @@ void destroyWindows (GLuint vertexbuffer, GLuint VertexArrayID, GLuint programID
 	glfwTerminate();
 }
 
+void configLayout(GLuint vertexbuffer, GLuint colorbuffer){
+
+	//1 é o buffer de vértices (buffer 0 )
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glVertexAttribPointer(
+		0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+		2,                  // tamanho do vertice
+		GL_FLOAT,           // tipo
+		GL_FALSE,           // normalizado?
+		0,                  // inicia na posição tal* do buffer
+		(void*)0            // array buffer offset
+	);
+
+	//2 é o buffer de cores (buffer1)
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+	glVertexAttribPointer(
+		1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+		3,                                // tamanho do vertice
+		GL_FLOAT,                         // tipo
+		GL_FALSE,                         // normalizado?
+		0,                                // stride
+		(void*)0                          // array buffer offset
+	);
+}
+
+void PrintNaTela (GLfloat *vertices, int vertexSize, GLfloat *cores, int colorSize)
+	{
+		//Triangulo 1
+		glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+		//color RGB
+		glBufferData(GL_ARRAY_BUFFER, colorSize, cores, GL_STATIC_DRAW);
+		//vertexs
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+		glBufferData(GL_ARRAY_BUFFER, vertexSize, vertices, GL_STATIC_DRAW);
+		glDrawArrays(GL_TRIANGLES, 0, vertexSize/sizeof(GLfloat)); 
+		
+	}
+
 int main(void)
 {
 	initWindow();
 
-	GLuint VertexArrayID;
+	GLuint VertexArrayID; //conexão com a placa de video
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
 
-	//Leitura e compilação dos Shaders em tempo de execução
-	GLuint programID = LoadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
+	GLuint programID = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
 
 	//Array que representa as coordenadas x e y de um triangulo
-	static const GLfloat vertex_buffer_data_triangle[] = {
-			    /*Car 1*/
+	GLfloat g_vertex_buffer_data_car[72] = {
+		    /*Car 1*/
 		// Body
 		-10.0f,10.0f,//A
 		-10.0f,-10.0f,//H
@@ -115,17 +158,44 @@ int main(void)
 		 10.0f,-20.0f,//K
 	};
 
-	//Gerar 1 buffer, colocar o identificador resultante em vertexbuffer
-	GLuint vertexbuffer;
+	GLfloat g_color_buffer_data_car[72] = { 
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
 
-	//Gerar 1 buffer, colocar o identificador resultante em vertexbuffer
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+	};
+
 	glGenBuffers(1, &vertexbuffer);
+	
+	glGenBuffers(1, &colorbuffer);
 
-	//Isso identificará nosso buffer de vértice
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-
-	//envia vértices a Opengl
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_buffer_data_triangle), vertex_buffer_data_triangle, GL_STATIC_DRAW);
 
 	do{
 		// Limpa a Tela
@@ -134,20 +204,9 @@ int main(void)
 		// Para definir os Shaders
 		glUseProgram(programID);
 
-		// Primeiro buffer de atributo: vértices
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-		glVertexAttribPointer(
-			0,                  // Atributo 0. Nenhum motivo específico para 0, mas deve corresponder ao layout no shader.
-			2,                  // Especifica o número de componentes por atributo vertex. Deve ser 1, 2, 3 ou 4. O valor inicial é 4.
-			GL_FLOAT,           // tipo do dado
-			GL_FALSE,           // normalizado?
-			0,                  // inicio
-			(void*)0            // array buffer offset
-		);
+		configLayout(vertexbuffer, colorbuffer);
 
-		// Desenha o triangulo
-		glDrawArrays(GL_TRIANGLES, 0, sizeof(vertex_buffer_data_triangle)); // 3 indices iniciando de 0 e 72 bytes
+		PrintNaTela(g_vertex_buffer_data_car,sizeof(g_vertex_buffer_data_car), g_color_buffer_data_car,sizeof(g_color_buffer_data_car));
 
 		glDisableVertexAttribArray(0);
 		glfwSwapBuffers(window);
