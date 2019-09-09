@@ -7,10 +7,14 @@ layout(location = 1) in vec3 vertexColor; //RGB
 // out colorVertex FragmenteShader
 out vec3 fragmentColor;
 
+//Matrix do modelo
+uniform mat3 MatrizCombinada;
+
 void main ()
 {
-    gl_Position.xy = (vertexPosition_modelspace/100);
+    gl_Position.xyw = MatrizCombinada * vec3(vertexPosition_modelspace/100,1);
     gl_Position.z = 0;
-    gl_Position.w = 1; // 1 - Ponto, 0 - Vetor
+    //gl_Position.w = 1; // 1 - Ponto, 0 - Vetor
     fragmentColor = vertexColor;
 }
+
