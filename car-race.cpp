@@ -42,7 +42,7 @@ int initWindow ()
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(WIDTH, HEIGHT, "Red triangle", NULL, NULL);
+	window = glfwCreateWindow(WIDTH, HEIGHT, "Car Race", NULL, NULL);
 	if (window == NULL) {
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
 		getchar();
@@ -410,10 +410,12 @@ int main(void)
 		//KeyBoard(window, position);
 		configLayout(vertexbuffer, colorbuffer);
 		KeyboardMovimentObject();
-		MatrizCombinada = translation;
+		MatrizCombinada = glm::mat3(1.0f);
 		glUniformMatrix3fv(MatrixID, 1, GL_TRUE, &MatrizCombinada[0][0]);
-
 		PrintNaTela(g_vertex_buffer_data_pista2,sizeof(g_vertex_buffer_data_pista2), g_color_buffer_data_pista2,sizeof(g_color_buffer_data_pista2));
+
+		MatrizCombinada =translation;
+		glUniformMatrix3fv(MatrixID, 1, GL_TRUE, &MatrizCombinada[0][0]);
 		PrintNaTela(g_vertex_buffer_data_car,sizeof(g_vertex_buffer_data_car), g_color_buffer_data_car,sizeof(g_color_buffer_data_car));
 
 		glDisableVertexAttribArray(0);
