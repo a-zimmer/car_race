@@ -109,23 +109,23 @@ void KeyboardMovimentObject(){
 	
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) //Up
 	{		
-		translation[0][2] = horizontal;
-		translation[1][2] = vertical;
+		translation[0][2] -= 0.00f;
+		translation[1][2] += 0.05f;
 
 	}else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) //Down
 	{		
-		translation[0][2] = horizontal;
-		translation[1][2] = vertical;
+		translation[0][2] -= 0.00f;
+		translation[1][2] -= 0.05f;
 
 	}else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) //Right
 	{		
-		translation[0][2] = horizontal-0.3;
-		translation[1][2] = vertical-0.1;
+		translation[0][2] += 0.05f;
+		translation[1][2] += 0.0f;
 
 	}else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) //Left
 	{		
-		translation[0][2] = horizontal+0.3;
-		translation[1][2] = vertical-0.1;
+		translation[0][2] -= 0.05f;
+		translation[1][2] -= 0.0f;
 	}
 }
 
@@ -414,7 +414,7 @@ int main(void)
 		glUniformMatrix3fv(MatrixID, 1, GL_TRUE, &MatrizCombinada[0][0]);
 		PrintNaTela(g_vertex_buffer_data_pista2,sizeof(g_vertex_buffer_data_pista2), g_color_buffer_data_pista2,sizeof(g_color_buffer_data_pista2));
 
-		MatrizCombinada =translation;
+		MatrizCombinada = translation;
 		glUniformMatrix3fv(MatrixID, 1, GL_TRUE, &MatrizCombinada[0][0]);
 		PrintNaTela(g_vertex_buffer_data_car,sizeof(g_vertex_buffer_data_car), g_color_buffer_data_car,sizeof(g_color_buffer_data_car));
 
