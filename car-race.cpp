@@ -253,6 +253,78 @@ int main(void)
 		1.0f,  0.0f,  0.0f,
 	};
 
+	GLfloat g_vertex_buffer_data_car2[] = {
+		// Body
+		0.0f,90.0f,
+		0.0f,75.0f,
+		5.0f,75.0f,//D
+		 //2
+		0.0f,90.0f,
+		5.0f,90.0f,//B
+		5.0f,75.0f,//D
+
+		//Perna
+		-10.0f,85.0f,//E
+		-10.0f,80.0f,//F
+		 15.0f,80.0f,//J
+		 //2
+		-10.0f,85.0f,//E
+		 15.0f,85.0f,//I
+		 15.0f,80.0f,//J
+
+		 //Bracos
+		-10.0f,80.0f,//F
+		-10.0f,75.0f,//K
+		 -5.0f,75.0f,//L
+		 //2
+		-10.0f,80.0f,//F
+		-5.0f,80.0f,//M
+		 -5.0f,75.0f,//L
+		 //Bracos 2
+		 10.0f,80.0f,//P
+		 10.0f,75.0f,//N
+		 15.0f,75.0f,//O
+		 //2
+		 10.0f,80.0f,//P
+		 15.0f,80.0f,//J
+		 15.0f,75.0f,//O
+	};
+
+	GLfloat g_color_buffer_data_car2[72] = {
+		// Body
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		//2
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		//Perna
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		//2
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		//Braços
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		//2
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		//Head
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		//?
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f,
+	};
+
 	GLfloat g_vertex_buffer_data_pista2[144] = {
 		    /*Pista 2*/
 		//Asfalto
@@ -417,6 +489,7 @@ int main(void)
 		MatrizCombinada = translation;
 		glUniformMatrix3fv(MatrixID, 1, GL_TRUE, &MatrizCombinada[0][0]);
 		PrintNaTela(g_vertex_buffer_data_car,sizeof(g_vertex_buffer_data_car), g_color_buffer_data_car,sizeof(g_color_buffer_data_car));
+		PrintNaTela(g_vertex_buffer_data_car2,sizeof(g_vertex_buffer_data_car2), g_color_buffer_data_car2,sizeof(g_color_buffer_data_car2));
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
