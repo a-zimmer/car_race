@@ -25,9 +25,6 @@ int widthWindow, heightWindow;
 
 glm::mat3 translation = glm::mat3(1.0f);
 
-
-
-
 int initWindow ()
 {
 	if(!glfwInit()) {
@@ -52,7 +49,7 @@ int initWindow ()
 
 	// Aplica o contexto atual da máquina de estados para Janela Atual
 	glfwMakeContextCurrent(window);
-	
+
 
 	// Necessário para core profile
 	glewExperimental = true;
@@ -83,7 +80,7 @@ void destroyWindows (GLuint vertexbuffer, GLuint VertexArrayID, GLuint programID
 	glfwTerminate();
 }
 
-/*void KeyBoard(GLWindow* window, glm::vec3& positon) {	
+/*void KeyBoard(GLWindow* window, glm::vec3& positon) {
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 		position.z -= 0.01f;
 	}
@@ -106,27 +103,31 @@ void KeyboardMovimentObject(){
 	double vertical = double(heightWindow - yposMouse * 2)/double(heightWindow);
 	printf("%lf %lf\n",xposMouse,yposMouse);
 	printf("%lf %lf\n",horizontal,vertical);
-	
-	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) //Up
-	{		
-		translation[0][2] -= 0.00f;
-		translation[1][2] += 0.05f;
 
-	}else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) //Down
-	{		
-		translation[0][2] -= 0.00f;
-		translation[1][2] -= 0.05f;
+	// if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) //Up
+	// {
+	// 	translation[0][2] -= 0.00f;
+	// 	translation[1][2] += 0.05f;
 
-	}else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) //Right
-	{		
-		translation[0][2] += 0.05f;
-		translation[1][2] += 0.0f;
+	// }else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) //Down
+	// {
+	// 	translation[0][2] -= 0.00f;
+	// 	translation[1][2] -= 0.05f;
 
-	}else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) //Left
-	{		
-		translation[0][2] -= 0.05f;
-		translation[1][2] -= 0.0f;
-	}
+	// }else
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) { // Right
+        if (translation[0][2] == 0.0) {
+            translation[0][2] = 0.5f;
+        } else if (translation[0][2] == -0.5) {
+            translation[0][2] = 0.0f;
+        }
+	} else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) { // Left
+        if (translation[0][2] == 0.0) {
+            translation[0][2] = -0.5f;
+        } else if (translation[0][2] == 0.5) {
+            translation[0][2] = 0.0f;
+        }
+    }
 }
 
 void configLayout(GLuint vertexbuffer, GLuint colorbuffer){
@@ -165,8 +166,7 @@ void PrintNaTela (GLfloat *vertices, int vertexSize, GLfloat *cores, int colorSi
 		//vertexs
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 		glBufferData(GL_ARRAY_BUFFER, vertexSize, vertices, GL_STATIC_DRAW);
-		glDrawArrays(GL_TRIANGLES, 0, vertexSize/sizeof(GLfloat)); 
-		
+		glDrawArrays(GL_TRIANGLES, 0, vertexSize/sizeof(GLfloat));
 	}
 
 int main(void)
@@ -180,7 +180,7 @@ int main(void)
 	GLuint programID = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
 
 	//Array que representa as coordenadas x e y de um triangulo
-	GLfloat g_vertex_buffer_data_car[72] = {
+	GLfloat g_vertex_buffer_data_car[] = {
 		    /*Car 1*/
 		// Body
 		-10.0f,10.0f,//A
@@ -188,7 +188,7 @@ int main(void)
 		 0.0f,-10.0f,//I
 		 //2
 		-10.0f,10.0f,//A
-		 0.0f,10.0f,//B	
+		 0.0f,10.0f,//B
 		 0.0f,-10.0f,//I
 
 		//Perna
@@ -218,7 +218,7 @@ int main(void)
 		 10.0f,-20.0f,//K
 	};
 
-	GLfloat g_color_buffer_data_car[72] = {
+	GLfloat g_color_buffer_data_car[] = {
 		// Body
 		1.0f,  0.0f,  0.0f,
 		1.0f,  0.0f,  0.0f,
@@ -325,101 +325,389 @@ int main(void)
 		1.0f,  0.0f,  0.0f,
 	};
 
-	GLfloat g_vertex_buffer_data_pista2[144] = {
-		    /*Pista 2*/
-		//Asfalto
-		 88.0f,-100.0f,//S
-		-88.0f,100.0f,//T2
-		-88.0f,-100.0f,//A2
-		 //2
-		 88.0f,-100.0f,//S
-		-88.0f,100.0f,//T2
-		 88.0f,100.0f,//A1
-		// Lado Direito
-		-98.0f,100.0f,//S2
-		-88.0f,-100.0f,//A2
-		-98.0f,-100.0f,//B2
-		//2
-		-98.0f,100.0f,//S2
-		-88.0f,100.0f,//T2
-		-88.0f,-100.0f,//A2
-		// Lado Esquerdo
-		 88.0f,100.0f,//A1
-		 98.0f,100.0f,//B1
-		 98.0f,-100.0f,//U
-		//2
-		 88.0f,100.0f,//A1
-		 88.0f,-100.0f,//S
-		 98.0f,-100.0f,//U
-		//Faixa 01
-		-2.0f,98.0f,//M3
-		-2.0f,68.0f,//O3
-		 2.0f,68.0f,//P3
-		 //2
-		-2.0f,98.0f,//M3
-		 2.0f,98.0f,//N3
-		 2.0f,68.0f,//P3
-		 //Faixa 02
-		-2.0f,58.0f,//Q3
-		-2.0f,28.0f,//S3
-		 2.0f,28.0f,//T3
-		 //2
-		-2.0f,58.0f,//Q3
-		 2.0f,58.0f,//R3
-		 2.0f,28.0f,//T3
-		 //Faixa 03
-		-2.0f,18.0f,//U3
-		-2.0f,-12.0f,//W3
-		 2.0f,-12.0f,//Z3
-		 //2
-		-2.0f,18.0f,//U3
-		 2.0f,18.0f,//V3
-		 2.0f,-12.0f,//Z3
+	GLfloat g_vertex_buffer_data_pista2[] = {
+        // Muro direita
+        92.5f, 100.0f,
+        82.5f, 100.0f,
+        82.5f, 80.0f,
 
-		 //Faixa 04
-		-2.0f,-22.0f,//A4
-		-2.0f,-52.0f,//C4
-		 2.0f,-52.0f,//D4
-		 //2
-		-2.0f,-22.0f,//A4
-		 2.0f,-22.0f,//B4
-		 2.0f,-52.0f,//D4
+        92.5f, 100.0f,
+        92.5f, 80.0f,
+        82.5f, 80.0f,
 
-		 //Faixa 04
-		-2.0f,-62.0f,//E4
-		-2.0f,-92.0f,//G4
-		 2.0f,-92.0f,//H4
-		 //2
-		-2.0f,-62.0f,//E4
-		 2.0f,-62.0f,//F4
-		 2.0f,-92.0f,//H4
+        92.5f, 70.0f,
+        82.5f, 70.0f,
+        82.5f, 30.0f,
 
-	};
+        92.5f, 70.0f,
+        92.5f, 30.0f,
+        82.5f, 30.0f,
 
-	GLfloat g_color_buffer_data_pista2[144] = {
+        92.5f, 20.0f,
+        82.5f, 20.0f,
+        82.5f, 0.0f,
+
+        92.5f, 20.0f,
+        92.5f, 0.0f,
+        82.5f, 0.0f,
+
+        92.5f, 0.0f,
+        82.5f, 0.0f,
+        92.5f, -20.0f,
+
+        82.5f, 0.0f,
+        92.5f, -20.0f,
+        82.5f, -20.0f,
+
+        82.5f, -30.0f,
+        92.5f, -70.0f,
+        82.5f, -70.0f,
+
+        92.5f, -30.0f,
+        82.5f, -30.0f,
+        92.5f, -70.0f,
+
+        82.5f, -80.0f,
+        92.5f, -100.0f,
+        82.5f, -100.0f,
+
+        92.5f, -80.0f,
+        82.5f, -80.0f,
+        92.5f, -100.0f,
+
+        // Muro Esquerda
+        -92.5f, 100.0f,
+        -82.5f, 100.0f,
+        -82.5f, 80.0f,
+
+        -92.5f, 100.0f,
+        -92.5f, 80.0f,
+        -82.5f, 80.0f,
+
+        -92.5f, 70.0f,
+        -82.5f, 70.0f,
+        -82.5f, 30.0f,
+
+        -92.5f, 70.0f,
+        -92.5f, 30.0f,
+        -82.5f, 30.0f,
+
+        -92.5f, 20.0f,
+        -82.5f, 20.0f,
+        -82.5f, 0.0f,
+
+        -92.5f, 20.0f,
+        -92.5f, 0.0f,
+        -82.5f, 0.0f,
+
+        -92.5f, 0.0f,
+        -82.5f, 0.0f,
+        -92.5f, -20.0f,
+
+        -82.5f, 0.0f,
+        -92.5f, -20.0f,
+        -82.5f, -20.0f,
+
+        -82.5f, -30.0f,
+        -92.5f, -70.0f,
+        -82.5f, -70.0f,
+
+        -92.5f, -30.0f,
+        -82.5f, -30.0f,
+        -92.5f, -70.0f,
+
+        -82.5f, -80.0f,
+        -92.5f, -100.0f,
+        -82.5f, -100.0f,
+
+        -92.5f, -80.0f,
+        -82.5f, -80.0f,
+        -92.5f, -100.0f,
+
+        //Pista 1 (Esquerda)
+        -75.0f, 100.0f,
+        -75.0f, -100.0f,
+        -25.0f, 100.0f,
+
+        -75.0f, -100.0f,
+        -25.0f, -100.0f,
+        -25.0f, 100.0f,
+
+        //Pista 2 (Meio)
+        -25.0f, 100.0f,
+        -25.0f, -100.0f,
+        25.0f, 100.0f,
+
+        -25.0f, -100.0f,
+        25.0f, -100.0f,
+        25.0f, 100.0f,
+
+        //Pista 3 (Direita)
+        25.0f, 100.0f,
+        25.0f, -100.0f,
+        75.0f, 100.0f,
+
+        25.0f, -100.0f,
+        75.0f, -100.0f,
+        75.0f, 100.0f,
+
+        // Faixa 01 - Esquerda (centro vertical)
+        -27.0f, 15.0f,
+        -27.0f, -15.0f,
+        -23.0f, -15.0F,
+
+        -27.0f, 15.0f,
+        -23.0f, 15.0f,
+        -23.0f, -15.0F,
+
+        // Faixa 02 - Esquerda
+        -27.0f, 55.0f,
+        -27.0f, 25.0f,
+        -23.0f, 25.0F,
+
+        -27.0f, 55.0f,
+        -23.0f, 55.0f,
+        -23.0f, 25.0F,
+
+        // Faixa 03 - Esquerda
+        -27.0f, 95.0f,
+        -27.0f, 65.0f,
+        -23.0f, 65.0F,
+
+        -27.0f, 95.0f,
+        -23.0f, 95.0f,
+        -23.0f, 65.0F,
+
+        // Faixa 04 - Esquerda
+        -27.0f, -55.0f,
+        -27.0f, -25.0f,
+        -23.0f, -25.0F,
+
+        -27.0f, -55.0f,
+        -23.0f, -55.0f,
+        -23.0f, -25.0F,
+
+        // Faixa 05 - Esquerda
+        -27.0f, -95.0f,
+        -27.0f, -65.0f,
+        -23.0f, -65.0F,
+
+        -27.0f, -95.0f,
+        -23.0f, -95.0f,
+        -23.0f, -65.0f,
+
+        // Faixa 01 - Direita (centro vertical)
+        27.0f, 15.0f,
+        27.0f, -15.0f,
+        23.0f, -15.0F,
+
+        27.0f, 15.0f,
+        23.0f, 15.0f,
+        23.0f, -15.0F,
+
+        // Faixa 02 - Direita
+        27.0f, 55.0f,
+        27.0f, 25.0f,
+        23.0f, 25.0F,
+
+        27.0f, 55.0f,
+        23.0f, 55.0f,
+        23.0f, 25.0F,
+
+        // Faixa 03 - Direita
+        27.0f, 95.0f,
+        27.0f, 65.0f,
+        23.0f, 65.0F,
+
+        27.0f, 95.0f,
+        23.0f, 95.0f,
+        23.0f, 65.0F,
+
+        // Faixa 04 - Direita
+        27.0f, -55.0f,
+        27.0f, -25.0f,
+        23.0f, -25.0F,
+
+        27.0f, -55.0f,
+        23.0f, -55.0f,
+        23.0f, -25.0F,
+
+        // Faixa 05 - Direita
+        27.0f, -95.0f,
+        27.0f, -65.0f,
+        23.0f, -65.0F,
+
+        27.0f, -95.0f,
+        23.0f, -95.0f,
+        23.0f, -65.0f
+    };
+
+	GLfloat g_color_buffer_data_pista2[] = {
+        // Muro Direita
 		0.4f,  0.4,  0.4f,
 		0.4f,  0.4,  0.4f,
 		0.4f,  0.4,  0.4f,
-		
+
 		0.4f,  0.4,  0.4f,
 		0.4f,  0.4,  0.4f,
 		0.4f,  0.4,  0.4f,
 
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
 
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+        // Muro Esquerda
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+		0.4f,  0.4,  0.4f,
+
+        // Pista 1 (Esquerda)
+		0.0f,  0.0f,  0.0f,
+		0.0f,  0.0f,  0.0f,
+		0.0f,  0.0f,  0.0f,
+
+		0.0f,  0.0f,  0.0f,
+		0.0f,  0.0f,  0.0f,
+		0.0f,  0.0f,  0.0f,
+
+        // Pista 2 (Meio)
+		0.0f,  0.0f,  0.0f,
+		0.0f,  0.0f,  0.0f,
+		0.0f,  0.0f,  0.0f,
+
+		0.0f,  0.0f,  0.0f,
+		0.0f,  0.0f,  0.0f,
+		0.0f,  0.0f,  0.0f,
+
+        // Pista 3 (Direita)
+		0.0f,  0.0f,  0.0f,
+		0.0f,  0.0f,  0.0f,
+		0.0f,  0.0f,  0.0f,
+
+		0.0f,  0.0f,  0.0f,
+		0.0f,  0.0f,  0.0f,
+		0.0f,  0.0f,  0.0f,
+
+        // Faixas Pontilhadas (meio pistas)
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
 
 		1.0f,  1.0f,  1.0f,
 		1.0f,  1.0f,  1.0f,
@@ -463,7 +751,7 @@ int main(void)
 	};
 
 		glGenBuffers(1, &vertexbuffer);
-	
+
 		glGenBuffers(1, &colorbuffer);
 
 		GLuint MatrixID = glGetUniformLocation(programID, "MatrizCombinada");
