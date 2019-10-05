@@ -27,7 +27,7 @@ glm::mat3 translation = glm::mat3(1.0f);
 glm::vec3 vetorCores = glm::vec3(0.0f);
 glm::mat3 escala = glm::mat3(1.0f);
 glm::mat3 rotacao = glm::mat3(1.0f);
-glm::mat3 pistaMoviment = glm::mat3(1.0f);
+glm::mat3 pistaMovement = glm::mat3(1.0f);
 glm::mat3 objectTranslation = glm::mat3(1.0f);
 
 
@@ -89,15 +89,15 @@ void destroyWindows (GLuint vertexbuffer, GLuint VertexArrayID, GLuint programID
 
 
 
-void KeyboardMovimentObject(double deltaTime, double deltaTime2){
+void KeyboardMovementObject(double deltaTime, double deltaTime2){
 	glfwGetCursorPos(window, &xposMouse, &yposMouse);
 	glfwGetWindowSize(window,&widthWindow, &heightWindow);
 	double horizontal = double(xposMouse * 2 - widthWindow)/double(widthWindow);
 	double vertical = double(heightWindow - yposMouse * 2)/double(heightWindow);
 	//printf("%lf %lf\n",xposMouse,yposMouse);
 	//printf("%lf %lf\n",horizontal,vertical);
-	//translation[1][2] = -0.7; //Inicia o carro la em baixo na posiçao -0.7;
-	//objectTranslation[1][2] = -0.1;
+	translation[1][2] = -0.7; //Inicia o carro la em baixo na posiçao -0.7;
+	//objectTranslation[1][2] = -0.1f;
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) { // Right
         if (translation[0][2] == 0.0) {
             translation[0][2] = 0.5f;
@@ -111,11 +111,11 @@ void KeyboardMovimentObject(double deltaTime, double deltaTime2){
             translation[0][2] = 0.0f;
         }
     } else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) { // Left 
-        if (pistaMoviment[1][2] == 0.0) { // Testes de movimentação da pista
-        	pistaMoviment[1][2] -= 0.5f;
+        if (pistaMovement[1][2] == 0.0) { // Testes de Movementação da pista
+        	pistaMovement[1][2] -= 0.5f;
         	printf("MACONHA\n");
-    } else if (pistaMoviment[1][2] == -0.5f){
-    		pistaMoviment[1][2] = 0.0f;
+    } else if (pistaMovement[1][2] == -0.5f){
+    		pistaMovement[1][2] = 0.0f;
     		printf("MACONHA2\n");
     	}
     } else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) { // DOWN
@@ -124,11 +124,11 @@ void KeyboardMovimentObject(double deltaTime, double deltaTime2){
     }
 }
 void trackAnimation(double deltaTime, double deltaTime2) {
-	if (pistaMoviment[1][2] == 0.0) {
-        	pistaMoviment[1][2] -= 0.5f;
+	if (pistaMovement[1][2] == 0.0) {
+        	pistaMovement[1][2] -= 0.5f;
         	//printf("Pista Move\n");
-    } else if (pistaMoviment[1][2] == -0.5f){
-    		pistaMoviment[1][2] = 0.0f;
+    } else if (pistaMovement[1][2] == -0.5f){
+    		pistaMovement[1][2] = 0.0f;
     		//printf("Pista Move 2\n");
     	}
 	
@@ -141,29 +141,34 @@ void turboAnimation(double deltaTime, double deltaTime2) {
             printf("Car Turbo UP\n");
         }
 	}
-	if(translation[1][2] == 0.5f) { //Não necessario pois o mesmo esta na função KeyboardMovimentObject();
+	if(translation[1][2] == 0.5f) { //Não necessario pois o mesmo esta na função KeyboardMovementObject(); Porem está muito rapido os frames
 		translation[1][2] = -0.7f;
 		printf("Car Turbo DOWN\n");
 	}
 }
 
-
 void objectAnimation(double deltaTime, double deltaTime2) {
 	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {	
 		srand (time(NULL));
-		int random = rand()%3;
+		int random = 1; // Problem Ele entra na função e sempre executa o if random ==1;
+		
+		if(objectTranslation[1][2] <= -2.0f) {
+			random = rand()%3;
+			objectTranslation[1][2] = -0.1f;
+			printf("TEST IF RANDOM\n");
+		}
         if (random == 2) {
-        	objectTranslation[0][2]  = 0.5f;//TESTE pr baixo
+        	objectTranslation[0][2]  = 0.5f;
 			objectTranslation[1][2] -= 0.05f;
-            printf("Object Moviment 2.\n");
+            printf("Object Movement 2.\n");
         }else if(random == 1) {
-        	objectTranslation[0][2] -= 0.00f;//TESTE pr baixo
+        	objectTranslation[0][2]  = 0.00f;
 			objectTranslation[1][2] -= 0.05f;
-            printf("Object Moviment 1.\n");
+            printf("Object Movement 1.\n");
         }else if(random == 0) {
-        	objectTranslation[0][2] -= 0.5f;//TESTE pr baixo
+        	objectTranslation[0][2]  = -0.5f;
 			objectTranslation[1][2] -= 0.05f;
-            printf("Object Moviment 0.\n");
+            printf("Object Movement 0.\n");
         }
     }
 }
@@ -312,7 +317,7 @@ int main(void)
 		//KeyBoard(window, position);
 		configLayout(vertexbuffer, colorbuffer);
 
-		KeyboardMovimentObject(deltaTime, deltaTime2);
+		KeyboardMovementObject(deltaTime, deltaTime2);
 		trackAnimation(deltaTime, deltaTime2);
 		turboAnimation(deltaTime, deltaTime2);
 		objectAnimation(deltaTime, deltaTime2);
@@ -320,7 +325,7 @@ int main(void)
 
 		MatrizCombinada = glm::mat3(1.0f);
 		drawModel(verticesPistas, MatrizCombinada, MatrixID, 0.0, 0.0, 0.0);
-		MatrizCombinada = pistaMoviment;
+		MatrizCombinada = pistaMovement;
 		drawModel(verticesMuro, MatrizCombinada, MatrixID, 0.4, 0.4, 0.4);
 		drawModel(verticesFaixas, MatrizCombinada, MatrixID, 1.0, 1.0, 1.0);
 
