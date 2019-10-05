@@ -18,12 +18,14 @@ using namespace glm;
 
 const GLint WIDTH = 1366, HEIGHT = 768;
 const GLfloat R = 0.0f, G = 0.0f, B = 0.3f, A = 0.0f;
-GLuint colorbuffer;
-GLuint vertexbuffer;
+GLuint colorbuffer, vertexbuffer;
 double xposMouse, yposMouse;
 int widthWindow, heightWindow;
 
 glm::mat3 translation = glm::mat3(1.0f);
+glm::vec3 vetorCores = glm::vec3(0.0f);
+glm::mat3 escala = glm::mat3(1.0f);
+glm::mat3 rotacao = glm::mat3(1.0f);
 
 int initWindow ()
 {
@@ -80,20 +82,6 @@ void destroyWindows (GLuint vertexbuffer, GLuint VertexArrayID, GLuint programID
 	glfwTerminate();
 }
 
-/*void KeyBoard(GLWindow* window, glm::vec3& positon) {
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		position.z -= 0.01f;
-	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		position.z += 0.01f;
-	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		position.x -= 0.01f;
-	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		position.x += 0.01f;
-	}
-}*/
 
 
 void KeyboardMovimentObject(){
@@ -104,17 +92,7 @@ void KeyboardMovimentObject(){
 	printf("%lf %lf\n",xposMouse,yposMouse);
 	printf("%lf %lf\n",horizontal,vertical);
 
-	// if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) //Up
-	// {
-	// 	translation[0][2] -= 0.00f;
-	// 	translation[1][2] += 0.05f;
 
-	// }else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) //Down
-	// {
-	// 	translation[0][2] -= 0.00f;
-	// 	translation[1][2] -= 0.05f;
-
-	// }else
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) { // Right
         if (translation[0][2] == 0.0) {
             translation[0][2] = 0.5f;
@@ -129,6 +107,8 @@ void KeyboardMovimentObject(){
         }
     }
 }
+
+
 
 void configLayout(GLuint vertexbuffer, GLuint colorbuffer){
 
@@ -157,17 +137,58 @@ void configLayout(GLuint vertexbuffer, GLuint colorbuffer){
 	);
 }
 
-void PrintNaTela (GLfloat *vertices, int vertexSize, GLfloat *cores, int colorSize)
-	{
-		//Carro
-		glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-		//color RGB
-		glBufferData(GL_ARRAY_BUFFER, colorSize, cores, GL_STATIC_DRAW);
-		//vertexs
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-		glBufferData(GL_ARRAY_BUFFER, vertexSize, vertices, GL_STATIC_DRAW);
-		glDrawArrays(GL_TRIANGLES, 0, vertexSize/sizeof(GLfloat));
+std::vector<glm::vec3> colorir(int tam, float R, float G, float B){
+	int i;
+	//alocação dinâmica
+	std::vector<glm::vec3> vertexColor;
+
+	for(i=0;i<tam;i++){
+		glm::vec3 color;
+		color.r = R;
+		color.g = G;
+		color.b = B;
+		vertexColor.push_back(color); 
+	}	
+	return vertexColor;
+}
+
+std::vector<glm::vec2> loadModel(const char *path){
+	FILE * file = fopen(path, "r");
+	std::vector<glm::vec2> vertices;
+	if( file == NULL ){
+		printf("Impossible to open the file ! Are you in the right path ? See Tutorial 1 for details\n");
+		fclose(file);
+		getchar();
+		return vertices;
 	}
+	
+	while( 1 ){
+		glm::vec2 vertex;
+		int res = fscanf(file, "%f %f\n", &vertex.x, &vertex.y);
+		if (res == EOF)
+			break; // EOF = End Of File. Quit the loop.
+		vertices.push_back(vertex);
+	}
+	fclose(file);
+	return vertices;
+}
+
+void drawModel(std::vector<glm::vec2> vertices, glm::mat3 MatrizCombinada,
+ 	GLuint MatrixID, GLfloat R, GLfloat G, GLfloat B){
+	
+	glUniformMatrix3fv(MatrixID, 1, GL_TRUE, &MatrizCombinada[0][0]);
+	//Triangulo
+	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+	//color trianguloRGB
+	std::vector<glm::vec3> color = colorir(vertices.size(), R, G, B);
+	glBufferData(GL_ARRAY_BUFFER, color.size()* sizeof(glm::vec3), &color[0], GL_STATIC_DRAW);
+	
+	//vertexs
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size()* sizeof(glm::vec2), &vertices[0], GL_STATIC_DRAW);
+	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+	
+}	
 
 int main(void)
 {
@@ -178,589 +199,24 @@ int main(void)
 	glBindVertexArray(VertexArrayID);
 
 	GLuint programID = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
+	std::vector<glm::vec3> color;
 
-	//Array que representa as coordenadas x e y de um triangulo
-	GLfloat g_vertex_buffer_data_car[] = {
-		    /*Car 1*/
-		// Body
-		-10.0f,10.0f,//A
-		-10.0f,-10.0f,//H
-		 0.0f,-10.0f,//I
-		 //2
-		-10.0f,10.0f,//A
-		 0.0f,10.0f,//B
-		 0.0f,-10.0f,//I
 
-		//Perna
-		-20.0f,-10.0f,//M
-		-20.0f,-20.0f,//J
-		 10.0f,-20.0f,//K
-		 //2
-		-20.0f,-10.0f,//M
-		 10.0f,-10.0f,//L
-		 10.0f,-20.0f,//K
 
-		 //Braços
-		-20.0f,10.0f,//D
-		-20.0f,0.0f,//E
-		 10.0f,0.0f,//G
-		 //2
-		-20.0f,10.0f,//D
-		 10.0f,10.0f,//F
-		 10.0f,0.0f,//G
-		 //Head
-		-15.0f,10.0f,//A
-		-5.0f,25.0f,//C
-		 5.0f,10.0f,//B
-		 //?
-		 -20.0f,-20.0f,//J
-		 -5.0f,-30.0f,//N
-		 10.0f,-20.0f,//K
-	};
+	glGenBuffers(1, &vertexbuffer);
 
-	GLfloat g_color_buffer_data_car[] = {
-		// Body
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		//2
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		//Perna
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		//2
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		//Braços
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		//2
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		//Head
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		//?
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-	};
+	glGenBuffers(1, &colorbuffer);
 
-	GLfloat g_vertex_buffer_data_car2[] = {
-		// Body
-		0.0f,90.0f,
-		0.0f,75.0f,
-		5.0f,75.0f,//D
-		 //2
-		0.0f,90.0f,
-		5.0f,90.0f,//B
-		5.0f,75.0f,//D
+	GLuint MatrixID = glGetUniformLocation(programID, "MatrizCombinada");
+	glLineWidth(5.0f);
+	glm::mat3 MatrizCombinada = glm::mat3(1.0f);
 
-		//Perna
-		-10.0f,85.0f,//E
-		-10.0f,80.0f,//F
-		 15.0f,80.0f,//J
-		 //2
-		-10.0f,85.0f,//E
-		 15.0f,85.0f,//I
-		 15.0f,80.0f,//J
-
-		 //Bracos
-		-10.0f,80.0f,//F
-		-10.0f,75.0f,//K
-		 -5.0f,75.0f,//L
-		 //2
-		-10.0f,80.0f,//F
-		-5.0f,80.0f,//M
-		 -5.0f,75.0f,//L
-		 //Bracos 2
-		 10.0f,80.0f,//P
-		 10.0f,75.0f,//N
-		 15.0f,75.0f,//O
-		 //2
-		 10.0f,80.0f,//P
-		 15.0f,80.0f,//J
-		 15.0f,75.0f,//O
-	};
-
-	GLfloat g_color_buffer_data_car2[72] = {
-		// Body
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		//2
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		//Perna
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		//2
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		//Braços
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		//2
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		//Head
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		//?
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-		1.0f,  0.0f,  0.0f,
-	};
-
-	GLfloat g_vertex_buffer_data_pista2[] = {
-        // Muro direita
-        92.5f, 100.0f,
-        82.5f, 100.0f,
-        82.5f, 80.0f,
-
-        92.5f, 100.0f,
-        92.5f, 80.0f,
-        82.5f, 80.0f,
-
-        92.5f, 70.0f,
-        82.5f, 70.0f,
-        82.5f, 30.0f,
-
-        92.5f, 70.0f,
-        92.5f, 30.0f,
-        82.5f, 30.0f,
-
-        92.5f, 20.0f,
-        82.5f, 20.0f,
-        82.5f, 0.0f,
-
-        92.5f, 20.0f,
-        92.5f, 0.0f,
-        82.5f, 0.0f,
-
-        92.5f, 0.0f,
-        82.5f, 0.0f,
-        92.5f, -20.0f,
-
-        82.5f, 0.0f,
-        92.5f, -20.0f,
-        82.5f, -20.0f,
-
-        82.5f, -30.0f,
-        92.5f, -70.0f,
-        82.5f, -70.0f,
-
-        92.5f, -30.0f,
-        82.5f, -30.0f,
-        92.5f, -70.0f,
-
-        82.5f, -80.0f,
-        92.5f, -100.0f,
-        82.5f, -100.0f,
-
-        92.5f, -80.0f,
-        82.5f, -80.0f,
-        92.5f, -100.0f,
-
-        // Muro Esquerda
-        -92.5f, 100.0f,
-        -82.5f, 100.0f,
-        -82.5f, 80.0f,
-
-        -92.5f, 100.0f,
-        -92.5f, 80.0f,
-        -82.5f, 80.0f,
-
-        -92.5f, 70.0f,
-        -82.5f, 70.0f,
-        -82.5f, 30.0f,
-
-        -92.5f, 70.0f,
-        -92.5f, 30.0f,
-        -82.5f, 30.0f,
-
-        -92.5f, 20.0f,
-        -82.5f, 20.0f,
-        -82.5f, 0.0f,
-
-        -92.5f, 20.0f,
-        -92.5f, 0.0f,
-        -82.5f, 0.0f,
-
-        -92.5f, 0.0f,
-        -82.5f, 0.0f,
-        -92.5f, -20.0f,
-
-        -82.5f, 0.0f,
-        -92.5f, -20.0f,
-        -82.5f, -20.0f,
-
-        -82.5f, -30.0f,
-        -92.5f, -70.0f,
-        -82.5f, -70.0f,
-
-        -92.5f, -30.0f,
-        -82.5f, -30.0f,
-        -92.5f, -70.0f,
-
-        -82.5f, -80.0f,
-        -92.5f, -100.0f,
-        -82.5f, -100.0f,
-
-        -92.5f, -80.0f,
-        -82.5f, -80.0f,
-        -92.5f, -100.0f,
-
-        //Pista 1 (Esquerda)
-        -75.0f, 100.0f,
-        -75.0f, -100.0f,
-        -25.0f, 100.0f,
-
-        -75.0f, -100.0f,
-        -25.0f, -100.0f,
-        -25.0f, 100.0f,
-
-        //Pista 2 (Meio)
-        -25.0f, 100.0f,
-        -25.0f, -100.0f,
-        25.0f, 100.0f,
-
-        -25.0f, -100.0f,
-        25.0f, -100.0f,
-        25.0f, 100.0f,
-
-        //Pista 3 (Direita)
-        25.0f, 100.0f,
-        25.0f, -100.0f,
-        75.0f, 100.0f,
-
-        25.0f, -100.0f,
-        75.0f, -100.0f,
-        75.0f, 100.0f,
-
-        // Faixa 01 - Esquerda (centro vertical)
-        -27.0f, 15.0f,
-        -27.0f, -15.0f,
-        -23.0f, -15.0F,
-
-        -27.0f, 15.0f,
-        -23.0f, 15.0f,
-        -23.0f, -15.0F,
-
-        // Faixa 02 - Esquerda
-        -27.0f, 55.0f,
-        -27.0f, 25.0f,
-        -23.0f, 25.0F,
-
-        -27.0f, 55.0f,
-        -23.0f, 55.0f,
-        -23.0f, 25.0F,
-
-        // Faixa 03 - Esquerda
-        -27.0f, 95.0f,
-        -27.0f, 65.0f,
-        -23.0f, 65.0F,
-
-        -27.0f, 95.0f,
-        -23.0f, 95.0f,
-        -23.0f, 65.0F,
-
-        // Faixa 04 - Esquerda
-        -27.0f, -55.0f,
-        -27.0f, -25.0f,
-        -23.0f, -25.0F,
-
-        -27.0f, -55.0f,
-        -23.0f, -55.0f,
-        -23.0f, -25.0F,
-
-        // Faixa 05 - Esquerda
-        -27.0f, -95.0f,
-        -27.0f, -65.0f,
-        -23.0f, -65.0F,
-
-        -27.0f, -95.0f,
-        -23.0f, -95.0f,
-        -23.0f, -65.0f,
-
-        // Faixa 01 - Direita (centro vertical)
-        27.0f, 15.0f,
-        27.0f, -15.0f,
-        23.0f, -15.0F,
-
-        27.0f, 15.0f,
-        23.0f, 15.0f,
-        23.0f, -15.0F,
-
-        // Faixa 02 - Direita
-        27.0f, 55.0f,
-        27.0f, 25.0f,
-        23.0f, 25.0F,
-
-        27.0f, 55.0f,
-        23.0f, 55.0f,
-        23.0f, 25.0F,
-
-        // Faixa 03 - Direita
-        27.0f, 95.0f,
-        27.0f, 65.0f,
-        23.0f, 65.0F,
-
-        27.0f, 95.0f,
-        23.0f, 95.0f,
-        23.0f, 65.0F,
-
-        // Faixa 04 - Direita
-        27.0f, -55.0f,
-        27.0f, -25.0f,
-        23.0f, -25.0F,
-
-        27.0f, -55.0f,
-        23.0f, -55.0f,
-        23.0f, -25.0F,
-
-        // Faixa 05 - Direita
-        27.0f, -95.0f,
-        27.0f, -65.0f,
-        23.0f, -65.0F,
-
-        27.0f, -95.0f,
-        23.0f, -95.0f,
-        23.0f, -65.0f
-    };
-
-	GLfloat g_color_buffer_data_pista2[] = {
-        // Muro Direita
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-        // Muro Esquerda
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-		0.4f,  0.4,  0.4f,
-
-        // Pista 1 (Esquerda)
-		0.0f,  0.0f,  0.0f,
-		0.0f,  0.0f,  0.0f,
-		0.0f,  0.0f,  0.0f,
-
-		0.0f,  0.0f,  0.0f,
-		0.0f,  0.0f,  0.0f,
-		0.0f,  0.0f,  0.0f,
-
-        // Pista 2 (Meio)
-		0.0f,  0.0f,  0.0f,
-		0.0f,  0.0f,  0.0f,
-		0.0f,  0.0f,  0.0f,
-
-		0.0f,  0.0f,  0.0f,
-		0.0f,  0.0f,  0.0f,
-		0.0f,  0.0f,  0.0f,
-
-        // Pista 3 (Direita)
-		0.0f,  0.0f,  0.0f,
-		0.0f,  0.0f,  0.0f,
-		0.0f,  0.0f,  0.0f,
-
-		0.0f,  0.0f,  0.0f,
-		0.0f,  0.0f,  0.0f,
-		0.0f,  0.0f,  0.0f,
-
-        // Faixas Pontilhadas (meio pistas)
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-	};
-
-		glGenBuffers(1, &vertexbuffer);
-
-		glGenBuffers(1, &colorbuffer);
-
-		GLuint MatrixID = glGetUniformLocation(programID, "MatrizCombinada");
-		glm::mat3 MatrizCombinada = glm::mat3(1.0f);
-		//glm::vec3 position(0.f);
-		//glm::mat4 ModelMatrix(1.f);
-		//ModelMatrix = glm::translate(ModelMatrix,position);
-
-
+	std::vector<glm::vec2> verticesCar1 = loadModel("data/car1.txt");
+	std::vector<glm::vec2> verticesCar2 = loadModel("data/car2.txt");
+	std::vector<glm::vec2> verticesMuro = loadModel("data/muro.txt");
+	std::vector<glm::vec2> verticesPistas = loadModel("data/pistas.txt");
+	std::vector<glm::vec2> verticesFaixas = loadModel("data/faixas.txt");
+	
 	do{
 		// Limpa a Tela
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -771,13 +227,14 @@ int main(void)
 		configLayout(vertexbuffer, colorbuffer);
 		KeyboardMovimentObject();
 		MatrizCombinada = glm::mat3(1.0f);
-		glUniformMatrix3fv(MatrixID, 1, GL_TRUE, &MatrizCombinada[0][0]);
-		PrintNaTela(g_vertex_buffer_data_pista2,sizeof(g_vertex_buffer_data_pista2), g_color_buffer_data_pista2,sizeof(g_color_buffer_data_pista2));
+		drawModel(verticesMuro, MatrizCombinada, MatrixID, 0.4, 0.4, 0.4);
+		drawModel(verticesPistas, MatrizCombinada, MatrixID, 0.0, 0.0, 0.0);
+		drawModel(verticesFaixas, MatrizCombinada, MatrixID, 1.0, 1.0, 1.0);
+
 
 		MatrizCombinada = translation;
-		glUniformMatrix3fv(MatrixID, 1, GL_TRUE, &MatrizCombinada[0][0]);
-		PrintNaTela(g_vertex_buffer_data_car,sizeof(g_vertex_buffer_data_car), g_color_buffer_data_car,sizeof(g_color_buffer_data_car));
-		PrintNaTela(g_vertex_buffer_data_car2,sizeof(g_vertex_buffer_data_car2), g_color_buffer_data_car2,sizeof(g_color_buffer_data_car2));
+		drawModel(verticesCar1, MatrizCombinada, MatrixID, 1.0, 0.0, 0.0);
+		drawModel(verticesCar2, MatrizCombinada, MatrixID, 0.0, 0.0, 0.0);
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
