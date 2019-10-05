@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h> 
 
 // Include GLEW
 #include <GL/glew.h>
@@ -16,7 +17,7 @@ using namespace glm;
 
 #include "common/shader.hpp"
 
-const GLint WIDTH = 1280, HEIGHT = 768;
+const GLint WIDTH = 800, HEIGHT = 600;
 const GLfloat R = 0.0f, G = 0.0f, B = 0.3f, A = 0.0f;
 GLuint colorbuffer, vertexbuffer;
 double xposMouse, yposMouse;
@@ -27,6 +28,9 @@ glm::vec3 vetorCores = glm::vec3(0.0f);
 glm::mat3 escala = glm::mat3(1.0f);
 glm::mat3 rotacao = glm::mat3(1.0f);
 glm::mat3 pistaMoviment = glm::mat3(1.0f);
+glm::mat3 objectTranslation = glm::mat3(1.0f);
+
+
 
 int initWindow ()
 {
@@ -92,8 +96,8 @@ void KeyboardMovimentObject(double deltaTime, double deltaTime2){
 	double vertical = double(heightWindow - yposMouse * 2)/double(heightWindow);
 	//printf("%lf %lf\n",xposMouse,yposMouse);
 	//printf("%lf %lf\n",horizontal,vertical);
-	translation[1][2] = -0.7; //Inicia o carro la em baixo na posiçao -0.7;
-
+	//translation[1][2] = -0.7; //Inicia o carro la em baixo na posiçao -0.7;
+	//objectTranslation[1][2] = -0.1;
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) { // Right
         if (translation[0][2] == 0.0) {
             translation[0][2] = 0.5f;
@@ -114,6 +118,9 @@ void KeyboardMovimentObject(double deltaTime, double deltaTime2){
     		pistaMoviment[1][2] = 0.0f;
     		printf("MACONHA2\n");
     	}
+    } else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) { // DOWN
+        	objectTranslation[0][2] -= 0.00f;//TESTE pr baixo
+			objectTranslation[1][2] -= 0.05f;
     }
 }
 void trackAnimation(double deltaTime, double deltaTime2) {
@@ -138,6 +145,27 @@ void turboAnimation(double deltaTime, double deltaTime2) {
 		translation[1][2] = -0.7f;
 		printf("Car Turbo DOWN\n");
 	}
+}
+
+
+void objectAnimation(double deltaTime, double deltaTime2) {
+	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {	
+		srand (time(NULL));
+		int random = rand()%3;
+        if (random == 2) {
+        	objectTranslation[0][2]  = 0.5f;//TESTE pr baixo
+			objectTranslation[1][2] -= 0.05f;
+            printf("Object Moviment 2.\n");
+        }else if(random == 1) {
+        	objectTranslation[0][2] -= 0.00f;//TESTE pr baixo
+			objectTranslation[1][2] -= 0.05f;
+            printf("Object Moviment 1.\n");
+        }else if(random == 0) {
+        	objectTranslation[0][2] -= 0.5f;//TESTE pr baixo
+			objectTranslation[1][2] -= 0.05f;
+            printf("Object Moviment 0.\n");
+        }
+    }
 }
 
 void configLayout(GLuint vertexbuffer, GLuint colorbuffer){
@@ -250,7 +278,8 @@ int main(void)
  	int nbFrames = 0, nbFrames2=0;
 	// Measure speed
 	double deltaTime = 0,deltaTime2 = 0,currentTime;
-	
+	translation[1][2] = -0.7; //Inicia o carro la em baixo na posiçao -0.7;
+	objectTranslation[1][2] = -0.1;
 	do{
 		//Medindo Velocidade
 		currentTime = glfwGetTime();
@@ -286,6 +315,8 @@ int main(void)
 		KeyboardMovimentObject(deltaTime, deltaTime2);
 		trackAnimation(deltaTime, deltaTime2);
 		turboAnimation(deltaTime, deltaTime2);
+		objectAnimation(deltaTime, deltaTime2);
+
 
 		MatrizCombinada = glm::mat3(1.0f);
 		drawModel(verticesPistas, MatrizCombinada, MatrixID, 0.0, 0.0, 0.0);
@@ -296,7 +327,8 @@ int main(void)
 
 		MatrizCombinada = translation;
 		drawModel(verticesCar1, MatrizCombinada, MatrixID, 1.0, 0.0, 0.0);
-		drawModel(verticesCar2, MatrizCombinada, MatrixID, 0.0, 0.0, 0.0);
+		MatrizCombinada = objectTranslation;
+		drawModel(verticesCar2, MatrizCombinada, MatrixID, 0.0, 0.0, 1.0);
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
