@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h> 
+#include <time.h>
 
 // Include GLEW
 #include <GL/glew.h>
@@ -21,7 +21,7 @@ const GLint WIDTH = 800, HEIGHT = 600;
 const GLfloat R = 0.0f, G = 0.0f, B = 0.3f, A = 0.0f;
 GLuint colorbuffer, vertexbuffer;
 double xposMouse, yposMouse;
-int widthWindow, heightWindow;
+int widthWindow, heightWindow, randomPosition = 1;
 
 glm::mat3 translation = glm::mat3(1.0f);
 glm::vec3 vetorCores = glm::vec3(0.0f);
@@ -110,7 +110,7 @@ void KeyboardMovementObject(double deltaTime, double deltaTime2){
         } else if (translation[0][2] == 0.5) {
             translation[0][2] = 0.0f;
         }
-    } else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) { // Left 
+    } else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) { // Left
         if (pistaMovement[1][2] == 0.0) { // Testes de Movementação da pista
         	pistaMovement[1][2] -= 0.5f;
         	printf("MACONHA\n");
@@ -131,7 +131,7 @@ void trackAnimation(double deltaTime, double deltaTime2) {
     		pistaMovement[1][2] = 0.0f;
     		//printf("Pista Move 2\n");
     	}
-	
+
 }
 
 void turboAnimation(double deltaTime, double deltaTime2) {
@@ -148,26 +148,29 @@ void turboAnimation(double deltaTime, double deltaTime2) {
 }
 
 void objectAnimation(double deltaTime, double deltaTime2) {
-	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {	
-		srand (time(NULL));
-		int random = 1; // Problem Ele entra na função e sempre executa o if random ==1;
-		
-		if(objectTranslation[1][2] <= -2.0f) {
-			random = rand()%3;
+	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+        printf("randomPosition: %d\n", randomPosition);
+
+		if (objectTranslation[1][2] <= -2.0f) {
+            randomPosition = rand() % 3;
 			objectTranslation[1][2] = -0.1f;
 			printf("TEST IF RANDOM\n");
 		}
-        if (random == 2) {
+        if (randomPosition == 2) {
         	objectTranslation[0][2]  = 0.5f;
-			objectTranslation[1][2] -= 0.05f;
+			objectTranslation[1][2] -= 0.005f;
             printf("Object Movement 2.\n");
-        }else if(random == 1) {
+        }
+
+        if (randomPosition == 1) {
         	objectTranslation[0][2]  = 0.00f;
-			objectTranslation[1][2] -= 0.05f;
+			objectTranslation[1][2] -= 0.005f;
             printf("Object Movement 1.\n");
-        }else if(random == 0) {
+        }
+
+        if (randomPosition == 0) {
         	objectTranslation[0][2]  = -0.5f;
-			objectTranslation[1][2] -= 0.05f;
+			objectTranslation[1][2] -= 0.005f;
             printf("Object Movement 0.\n");
         }
     }
@@ -210,8 +213,8 @@ std::vector<glm::vec3> colorir(int tam, float R, float G, float B){
 		color.r = R;
 		color.g = G;
 		color.b = B;
-		vertexColor.push_back(color); 
-	}	
+		vertexColor.push_back(color);
+	}
 	return vertexColor;
 }
 
@@ -224,7 +227,7 @@ std::vector<glm::vec2> loadModel(const char *path){
 		getchar();
 		return vertices;
 	}
-	
+
 	while( 1 ){
 		glm::vec2 vertex;
 		int res = fscanf(file, "%f %f\n", &vertex.x, &vertex.y);
@@ -238,20 +241,20 @@ std::vector<glm::vec2> loadModel(const char *path){
 
 void drawModel(std::vector<glm::vec2> vertices, glm::mat3 MatrizCombinada,
  	GLuint MatrixID, GLfloat R, GLfloat G, GLfloat B){
-	
+
 	glUniformMatrix3fv(MatrixID, 1, GL_TRUE, &MatrizCombinada[0][0]);
 	//Triangulo
 	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
 	//color trianguloRGB
 	std::vector<glm::vec3> color = colorir(vertices.size(), R, G, B);
 	glBufferData(GL_ARRAY_BUFFER, color.size()* sizeof(glm::vec3), &color[0], GL_STATIC_DRAW);
-	
+
 	//vertexs
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size()* sizeof(glm::vec2), &vertices[0], GL_STATIC_DRAW);
 	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-	
-}	
+
+}
 
 int main(void)
 {
