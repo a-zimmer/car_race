@@ -22,6 +22,8 @@ const GLfloat R = 0.0f, G = 0.0f, B = 0.3f, A = 0.0f;
 GLuint colorbuffer, vertexbuffer;
 double xposMouse, yposMouse;
 int widthWindow, heightWindow, randomPosition = 1;
+int direita = 1;
+int esquerda = 0;
 
 glm::mat3 translation = glm::mat3(1.0f);
 glm::vec3 vetorCores = glm::vec3(0.0f);
@@ -98,13 +100,15 @@ void KeyboardMovementObject(double deltaTime, double deltaTime2){
 	//printf("%lf %lf\n",horizontal,vertical);
 	translation[1][2] = -0.7; //Inicia o carro la em baixo na posiçao -0.7;
 	//objectTranslation[1][2] = -0.1f;
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) { // Right
+
+	//Colocar FLAG DIREITA E ESQUERDA;
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && direita == 1) { // Right
         if (translation[0][2] == 0.0) {
             translation[0][2] = 0.5f;
         } else if (translation[0][2] == -0.5) {
             translation[0][2] = 0.0f;
         }
-	} else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) { // Left
+	} else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && esquerda == 0) { // Left
         if (translation[0][2] == 0.0) {
             translation[0][2] = -0.5f;
         } else if (translation[0][2] == 0.5) {
@@ -256,6 +260,35 @@ void drawModel(std::vector<glm::vec2> vertices, glm::mat3 MatrizCombinada,
 
 }
 
+glm::vec4 getCarrinhoBox(std::vector<glm::vec2> objeto) {
+	glm::vec4 carrinho;
+	int xMax = objeto[0].x, yMax = objeto[0].y, xMin = objeto[0].x, yMin = objeto[0].y;
+	for(int point = 0; point < objeto.size(); point++) {
+		printf("Objeto: %f\n", objeto[point].x);
+			if (xMax > objeto[point].x) {
+				xMax = objeto[point].x;
+			}if (xMin < objeto[point].x){
+				xMin = objeto[point].x;
+			}if (yMax > objeto[point].y){
+				yMax = objeto[point].y;
+			}if (yMin < objeto[point].y){
+				yMin = objeto[point].y;
+			};
+		}
+		printf("xMax:%f\nyMax:%f\nxMin:%f\nyMin:%f\n",xMax,yMax,xMin,yMin);
+		carrinhoUm = glm::vec4(xMax,yMax, xMin, yMin);
+	return carrinho;
+}
+
+void intersect(std::vector<glm::vec2> object) {
+  glm::vec4 carrinhoUm = getCarrinhoBox(object);
+  glm::vec4 carrinhoDois = getCarrinhoBox(object);
+  
+  return (carrinhoUm.minX <= carrinhoDois.maxX && carrinhoUm.maxX >= carrinhoDois.minX) &&
+         (carrinhoUm.minY <= carrinhoDois.maxY && carrinhoUm.maxY >= carrinhoDois.minY) &&
+         (carrinhoUm.minZ <= carrinhoDois.maxZ && carrinhoUm.maxZ >= carrinhoDois.minZ);
+}
+
 int main(void)
 {
 	initWindow();
@@ -294,24 +327,31 @@ int main(void)
 		nbFrames++;
 		deltaTime = currentTime - lastTime;
 		deltaTime2 = currentTime - lastTime2;
-		 if (deltaTime  >= 5.0 ){ // If last prinf() was more than 5 sec ago
+		 if (deltaTime  >= 0.09 ){ // If last prinf() was more than 5 sec ago
 		// 	 // printf and reset timer
 		 	 printf("%d \n",nbFrames );
-		 	 printf("%f ms/frame\n", 1000.0/double(nbFrames));
+		 	 printf("%f ms/frame/deltaTime\n", 1000.0/double(nbFrames));
 
 		 	 nbFrames = 0;
-		 	 lastTime += 5.0;
+		 	 trackAnimation(deltaTime, deltaTime2);
+		 	 lastTime += 0.09;
+		 	 
 		 }
 
-		 if (deltaTime2  >= 2.5 ){ // If last prinf() was more than 5 sec ago
+		 if (deltaTime2  >= 0.8){ // If last prinf() was more than 5 sec ago
 		// 	 // printf and reset timer
 		 	 printf("%d \n",nbFrames2 );
-		 	 printf("%f ms/frame\n", 1000.0/double(nbFrames2));
+		 	 printf("%f ms/frame/deltaTime2\n", 1000.0/double(nbFrames2));
 
 		 	 nbFrames2 = 0;
-		 	 lastTime2 += 2.5;
-		 }
+		 	 lastTime2 += 0.8;
+		 	 esquerda = 0;
+		 	 direita = 1;
+		 	 KeyboardMovementObject(deltaTime, deltaTime2);
+		 }	
 
+		 esquerda = 1;
+		 direita = 0;
 		// Limpa a Tela
 		glClear(GL_COLOR_BUFFER_BIT);
 
@@ -320,23 +360,28 @@ int main(void)
 		//KeyBoard(window, position);
 		configLayout(vertexbuffer, colorbuffer);
 
-		KeyboardMovementObject(deltaTime, deltaTime2);
-		trackAnimation(deltaTime, deltaTime2);
+		//KeyboardMovementObject(deltaTime, deltaTime2);
+		//trackAnimation(deltaTime, deltaTime2);
 		turboAnimation(deltaTime, deltaTime2);
 		objectAnimation(deltaTime, deltaTime2);
 
 
 		MatrizCombinada = glm::mat3(1.0f);
 		drawModel(verticesPistas, MatrizCombinada, MatrixID, 0.0, 0.0, 0.0);
-		MatrizCombinada = pistaMovement;
+		//MatrizCombinada = pistaMovement;
 		drawModel(verticesMuro, MatrizCombinada, MatrixID, 0.4, 0.4, 0.4);
+		MatrizCombinada = pistaMovement;
 		drawModel(verticesFaixas, MatrizCombinada, MatrixID, 1.0, 1.0, 1.0);
+
+
 
 
 		MatrizCombinada = translation;
 		drawModel(verticesCar1, MatrizCombinada, MatrixID, 1.0, 0.0, 0.0);
+		getCarrinhoBox(verticesCar1);
 		MatrizCombinada = objectTranslation;
 		drawModel(verticesCar2, MatrizCombinada, MatrixID, 0.0, 0.0, 1.0);
+		getCarrinhoBox(verticesCar2);
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
