@@ -275,19 +275,19 @@ glm::vec4 getCarrinhoBox(std::vector<glm::vec2> objeto) {
 				yMin = objeto[point].y;
 			};
 		}
-		printf("xMax:%f\nyMax:%f\nxMin:%f\nyMin:%f\n",xMax,yMax,xMin,yMin);
-		carrinhoUm = glm::vec4(xMax,yMax, xMin, yMin);
+		printf("xMax:%d\nyMax:%d\nxMin:%d\nyMin:%d\n",xMax,yMax,xMin,yMin);
+		carrinho = glm::vec4(xMax,yMax,xMin,yMin);
 	return carrinho;
 }
 
-void intersect(std::vector<glm::vec2> object) {
+/*void intersect(std::vector<glm::vec2> object) {
   glm::vec4 carrinhoUm = getCarrinhoBox(object);
   glm::vec4 carrinhoDois = getCarrinhoBox(object);
-  
-  return (carrinhoUm.minX <= carrinhoDois.maxX && carrinhoUm.maxX >= carrinhoDois.minX) &&
-         (carrinhoUm.minY <= carrinhoDois.maxY && carrinhoUm.maxY >= carrinhoDois.minY) &&
-         (carrinhoUm.minZ <= carrinhoDois.maxZ && carrinhoUm.maxZ >= carrinhoDois.minZ);
-}
+
+  return (carrinhoUm.xMin <= carrinhoDois.xMax && carrinhoUm.xMax >= carrinhoDois.xMin) &&
+         (carrinhoUm.yMin <= carrinhoDois.yMax && carrinhoUm.yMax >= carrinhoDois.yMin)// &&
+        // (carrinhoUm.minZ <= carrinhoDois.maxZ && carrinhoUm.maxZ >= carrinhoDois.minZ);
+}*/
 
 int main(void)
 {
