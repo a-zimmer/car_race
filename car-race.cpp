@@ -16,6 +16,7 @@ GLFWwindow* window;
 using namespace glm;
 
 #include "common/shader.hpp"
+//#include "common/song.hpp"
 
 const GLint WIDTH = 800, HEIGHT = 600;
 const GLfloat R = 0.0f, G = 0.0f, B = 0.3f, A = 0.0f;
@@ -150,31 +151,37 @@ void turboAnimation(double deltaTime, double deltaTime2) {
 		printf("Car Turbo DOWN\n");
 	}
 }
-
-void objectAnimation(double deltaTime, double deltaTime2) {
+float velocidadeObject = 0.005f;
+int nCarrinhos = 1;
+void objectAnimation() {
+	
 	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
         printf("randomPosition: %d\n", randomPosition);
 
-		if (objectTranslation[1][2] <= -2.0f) {
+		if (objectTranslation[1][2] < -2.0f) {
+			nCarrinhos += 1;
             randomPosition = rand() % 3;
 			objectTranslation[1][2] = -0.1f;
+			velocidadeObject += sqrt(nCarrinhos)/5000;
 			printf("TEST IF RANDOM\n");
 		}
         if (randomPosition == 2) {
         	objectTranslation[0][2]  = 0.5f;
-			objectTranslation[1][2] -= 0.005f;
+			objectTranslation[1][2] -= velocidadeObject;
             printf("Object Movement 2.\n");
         }
 
         if (randomPosition == 1) {
         	objectTranslation[0][2]  = 0.00f;
-			objectTranslation[1][2] -= 0.005f;
+			objectTranslation[1][2] -= velocidadeObject;
+			
             printf("Object Movement 1.\n");
         }
 
         if (randomPosition == 0) {
         	objectTranslation[0][2]  = -0.5f;
-			objectTranslation[1][2] -= 0.005f;
+			objectTranslation[1][2] -= velocidadeObject;
+			printf("Velocidade do objeto: %f \n", velocidadeObject);
             printf("Object Movement 0.\n");
         }
     }
@@ -262,9 +269,11 @@ void drawModel(std::vector<glm::vec2> vertices, glm::mat3 MatrizCombinada,
 
 glm::vec4 getCarrinhoBox(std::vector<glm::vec2> objeto) {
 	glm::vec4 carrinho;
-	int xMax = objeto[0].x, yMax = objeto[0].y, xMin = objeto[0].x, yMin = objeto[0].y;
+	float xMax = objeto[0].x, yMax = objeto[0].y, xMin = objeto[0].x, yMin = objeto[0].y;
+	//xMax += translation [0][2];
+
 	for(int point = 0; point < objeto.size(); point++) {
-		printf("Objeto: %f\n", objeto[point].x);
+		//printf("Objeto: %f\n", objeto[point].x);
 			if (xMax > objeto[point].x) {
 				xMax = objeto[point].x;
 			}if (xMin < objeto[point].x){
@@ -275,7 +284,7 @@ glm::vec4 getCarrinhoBox(std::vector<glm::vec2> objeto) {
 				yMin = objeto[point].y;
 			};
 		}
-		printf("xMax:%d\nyMax:%d\nxMin:%d\nyMin:%d\n",xMax,yMax,xMin,yMin);
+		//printf("xMax:%f\nyMax:%f\nxMin:%f\nyMin:%f\n",xMax,yMax,xMin,yMin);
 		carrinho = glm::vec4(xMax,yMax,xMin,yMin);
 	return carrinho;
 }
@@ -283,7 +292,10 @@ glm::vec4 getCarrinhoBox(std::vector<glm::vec2> objeto) {
 /*void intersect(std::vector<glm::vec2> object) {
   glm::vec4 carrinhoUm = getCarrinhoBox(object);
   glm::vec4 carrinhoDois = getCarrinhoBox(object);
-
+//	xMax = [0];
+//	yMax = [1];
+//	xMin = [2];
+//	yMin = [3];
   return (carrinhoUm.xMin <= carrinhoDois.xMax && carrinhoUm.xMax >= carrinhoDois.xMin) &&
          (carrinhoUm.yMin <= carrinhoDois.yMax && carrinhoUm.yMax >= carrinhoDois.yMin)// &&
         // (carrinhoUm.minZ <= carrinhoDois.maxZ && carrinhoUm.maxZ >= carrinhoDois.minZ);
@@ -322,6 +334,8 @@ int main(void)
 	translation[1][2] = -0.7; //Inicia o carro la em baixo na posiçao -0.7;
 	objectTranslation[1][2] = -0.1;
 	do{
+		bool colision = false;
+		int score = 0;
 		//Medindo Velocidade
 		currentTime = glfwGetTime();
 		nbFrames++;
@@ -329,8 +343,8 @@ int main(void)
 		deltaTime2 = currentTime - lastTime2;
 		 if (deltaTime  >= 0.09 ){ // If last prinf() was more than 5 sec ago
 		// 	 // printf and reset timer
-		 	 printf("%d \n",nbFrames );
-		 	 printf("%f ms/frame/deltaTime\n", 1000.0/double(nbFrames));
+		 	// printf("%d \n",nbFrames );
+		 	// printf("%f ms/frame/deltaTime\n", 1000.0/double(nbFrames));
 
 		 	 nbFrames = 0;
 		 	 trackAnimation(deltaTime, deltaTime2);
@@ -340,8 +354,8 @@ int main(void)
 
 		 if (deltaTime2  >= 0.8){ // If last prinf() was more than 5 sec ago
 		// 	 // printf and reset timer
-		 	 printf("%d \n",nbFrames2 );
-		 	 printf("%f ms/frame/deltaTime2\n", 1000.0/double(nbFrames2));
+		 	// printf("%d \n",nbFrames2 );
+		 	 //printf("%f ms/frame/deltaTime2\n", 1000.0/double(nbFrames2));
 
 		 	 nbFrames2 = 0;
 		 	 lastTime2 += 0.8;
@@ -363,7 +377,7 @@ int main(void)
 		//KeyboardMovementObject(deltaTime, deltaTime2);
 		//trackAnimation(deltaTime, deltaTime2);
 		turboAnimation(deltaTime, deltaTime2);
-		objectAnimation(deltaTime, deltaTime2);
+		objectAnimation();
 
 
 		MatrizCombinada = glm::mat3(1.0f);
@@ -374,7 +388,7 @@ int main(void)
 		drawModel(verticesFaixas, MatrizCombinada, MatrixID, 1.0, 1.0, 1.0);
 
 
-
+		
 
 		MatrizCombinada = translation;
 		drawModel(verticesCar1, MatrizCombinada, MatrixID, 1.0, 0.0, 0.0);
@@ -382,6 +396,12 @@ int main(void)
 		MatrizCombinada = objectTranslation;
 		drawModel(verticesCar2, MatrizCombinada, MatrixID, 0.0, 0.0, 1.0);
 		getCarrinhoBox(verticesCar2);
+		//Som Colisão
+		if(colision) {
+			printf("GAME OVER!!!\n");
+		}else {
+			score++;
+		};
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
