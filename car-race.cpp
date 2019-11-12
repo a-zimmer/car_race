@@ -268,9 +268,8 @@ void drawModel(std::vector<glm::vec2> vertices, glm::mat3 MatrizCombinada,
 }
 
 glm::vec4 getCarrinhoBox(std::vector<glm::vec2> objeto) {
-	glm::vec4 carrinho;
+	glm::vec4 box;
 	float xMax = objeto[0].x, yMax = objeto[0].y, xMin = objeto[0].x, yMin = objeto[0].y;
-	//xMax += translation [0][2];
 
 	for(int point = 0; point < objeto.size(); point++) {
 		//printf("Objeto: %f\n", objeto[point].x);
@@ -284,22 +283,23 @@ glm::vec4 getCarrinhoBox(std::vector<glm::vec2> objeto) {
 				yMin = objeto[point].y;
 			};
 		}
-		//printf("xMax:%f\nyMax:%f\nxMin:%f\nyMin:%f\n",xMax,yMax,xMin,yMin);
-		carrinho = glm::vec4(xMax,yMax,xMin,yMin);
-	return carrinho;
+		printf("IMPRIME: \nxMax:%f\nyMax:%f\nxMin:%f\nyMin:%f\n",xMax,yMax,xMin,yMin);
+		box = glm::vec4(xMax,yMax,xMin,yMin);
+	return box;
 }
 
-/*void intersect(std::vector<glm::vec2> object) {
-  glm::vec4 carrinhoUm = getCarrinhoBox(object);
-  glm::vec4 carrinhoDois = getCarrinhoBox(object);
+int intersect(glm::vec4 carrinhoUm,glm::vec4 carrinhoDois, glm::mat3 matrizDeTranslation, glm::mat3 matrizDeTranslation2) {
 //	xMax = [0];
 //	yMax = [1];
 //	xMin = [2];
 //	yMin = [3];
-  return (carrinhoUm.xMin <= carrinhoDois.xMax && carrinhoUm.xMax >= carrinhoDois.xMin) &&
-         (carrinhoUm.yMin <= carrinhoDois.yMax && carrinhoUm.yMax >= carrinhoDois.yMin)// &&
-        // (carrinhoUm.minZ <= carrinhoDois.maxZ && carrinhoUm.maxZ >= carrinhoDois.minZ);
-}*/
+if ((carrinhoUm[2] + matrizDeTranslation[0][2] <= carrinhoDois[0] + matrizDeTranslation2[0][2])
+ 	&& (carrinhoUm[0] + matrizDeTranslation[0][2] >= carrinhoDois[2] + matrizDeTranslation2[0][2]) &&
+    (carrinhoUm[3] + matrizDeTranslation[0][2] <= carrinhoDois[1] + matrizDeTranslation2[0][2])
+    && (carrinhoUm[1] + matrizDeTranslation[0][2] >= carrinhoDois[3] + matrizDeTranslation2[0][2])){
+    	return 1;
+    };
+};
 
 int main(void)
 {
@@ -392,12 +392,12 @@ int main(void)
 
 		MatrizCombinada = translation;
 		drawModel(verticesCar1, MatrizCombinada, MatrixID, 1.0, 0.0, 0.0);
-		getCarrinhoBox(verticesCar1);
+		glm::vec4 carrinhoOne = getCarrinhoBox(verticesCar1);
 		MatrizCombinada = objectTranslation;
 		drawModel(verticesCar2, MatrizCombinada, MatrixID, 0.0, 0.0, 1.0);
-		getCarrinhoBox(verticesCar2);
+ 		glm::vec4 carrinhoTwo = getCarrinhoBox(verticesCar2);
 		//Som Colisão
-		if(colision) {
+		if(intersect(carrinhoOne, carrinhoTwo, translation, objectTranslation)) {
 			printf("GAME OVER!!!\n");
 		}else {
 			score++;
