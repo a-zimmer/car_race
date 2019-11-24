@@ -61,7 +61,7 @@ void adicionaBarras(){
 	TwInit(TW_OPENGL_CORE, NULL);
 	TwWindowSize(WIDTH, HEIGHT);//Alterar tamanho da Janela
 
-	TwBar * bar = TwNewBar("TweakBar");
+	TwBar * bar = TwNewBar("MENU");
 	TwSetParam(bar, NULL, "position", TW_PARAM_CSTRING, 1, "10 10");
 	TwSetParam(bar, NULL, "refresh", TW_PARAM_CSTRING, 1, "0.1");
     TwDefine(" GLOBAL help='This example shows how to integrate AntTweakBar with GLFW and OpenGL.' "); // Message added to the help bar.
@@ -209,6 +209,9 @@ void trackAnimation() {
     		//printf("Pista Move 2\n");
     	}
 
+}
+void trackAnimation2() {
+	 pistaMovement[1][2] -= 0.05;
 }
 
 void turboAnimation(double deltaTime, double deltaTime2) {
@@ -454,6 +457,7 @@ int main(void)
 	std::vector<glm::vec2> verticesMuro = loadModel("data/muro.txt");
 	std::vector<glm::vec2> verticesPistas = loadModel("data/pistas.txt");
 	std::vector<glm::vec2> verticesFaixas = loadModel("data/faixas.txt");
+	std::vector<glm::vec2> verticesTelaInicial = loadModel("data/telaInicial.txt");
 
 	FMOD_Config(MediaPath("standrews.wav"));
 	FMOD_PlayPause(1);
@@ -467,6 +471,8 @@ int main(void)
 	translation[1][2] = -0.7; //Inicia o carro la em baixo na posiçao -0.7;
 	objectTranslation[1][2] = -0.1;
 
+	
+	bool joguinho = false;
 	do{
 		controlSong();
 		bool colision = false;
@@ -484,7 +490,7 @@ int main(void)
 
 		 	 nbFrames = 0;
 		 	if(ativo) {
-		 	 trackAnimation();
+		 	// trackAnimation();
 		 	}
 		 	 lastTime += 0.09;
 		 	 
@@ -525,42 +531,50 @@ int main(void)
 		//KeyboardMovementObject(deltaTime, deltaTime2);
 		//trackAnimation(deltaTime, deltaTime2);
 		turboAnimation(deltaTime, deltaTime2);
-		
-
-
-		MatrizCombinada = glm::mat3(1.0f);
-		drawModel(verticesPistas, MatrizCombinada, MatrixID, 0.0, 0.0, 0.0);
-		//MatrizCombinada = pistaMovement;
-		drawModel(verticesMuro, MatrizCombinada, MatrixID, 0.4, 0.4, 0.4);
-		MatrizCombinada = pistaMovement;
-		drawModel(verticesFaixas, MatrizCombinada, MatrixID, 1.0, 1.0, 1.0);
-
-
-		
+		if(joguinho == false) {
+			drawModel(verticesTelaInicial, MatrizCombinada, MatrixID, 0.0, 0.0, 0.0);
+			char telaInicial[256];
+			sprintf(telaInicial,"CAR RACE");
+			printText2D(telaInicial, 130, 400, 70);
+			sprintf(telaInicial,"ENTER PARA JOGAR");
+			printText2D(telaInicial, 170, 300, 30);
+		}
+		if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+			joguinho = true;
+			ativo = true;
+		}
 		char text[256];
-		MatrizCombinada = translation;
-		drawModel(verticesCar1, MatrizCombinada, MatrixID, 1.0, 0.0, 0.0);
-		glm::vec4 carrinhoOne = getCarrinhoBox(verticesCar1);
-		MatrizCombinada = objectTranslation;
-		drawModel(verticesCar2, MatrizCombinada, MatrixID, 0.0, 0.0, 1.0);
- 		glm::vec4 carrinhoTwo = getCarrinhoBox(verticesCar2);
+		if(joguinho) {
+			MatrizCombinada = glm::mat3(1.0f);
+			drawModel(verticesPistas, MatrizCombinada, MatrixID, 0.0, 0.0, 0.0);
+			MatrizCombinada = pistaMovement;
+			drawModel(verticesMuro, MatrizCombinada, MatrixID, 0.4, 0.4, 0.4);
+			MatrizCombinada = pistaMovement;
+			drawModel(verticesFaixas, MatrizCombinada, MatrixID, 1.0, 1.0, 1.0);
 
-		//Som Colisão, Score, GAMEOVER
-		if(intersect(carrinhoOne, carrinhoTwo, translation, objectTranslation)) {
-			sprintf(text,"GAME OVER");
-			printText2D(text, 400, 400, 100);
-		}else {
-			score++;
-		};
+			MatrizCombinada = translation;
+			drawModel(verticesCar1, MatrizCombinada, MatrixID, 1.0, 0.0, 0.0);
+			glm::vec4 carrinhoOne = getCarrinhoBox(verticesCar1);
+			MatrizCombinada = objectTranslation;
+			drawModel(verticesCar2, MatrizCombinada, MatrixID, 0.0, 0.0, 1.0);
+ 			glm::vec4 carrinhoTwo = getCarrinhoBox(verticesCar2);
 
-		TwDraw();
+ 			
+			//Som Colisão, Score, GAMEOVER
+			if(intersect(carrinhoOne, carrinhoTwo, translation, objectTranslation)) {
+
+				sprintf(text,"GAME OVER");
+				printText2D(text, 400, 400, 100);
+			}else {
+				score++;
+			};
+			TwDraw();
+			sprintf(text,"Score:%d",score);
+			printText2D(text, 525, 560, 25);
+		}
+
 		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
-
-		
-		sprintf(text,"Score:%d",score);
-		printText2D(text, 525, 560, 25);
-
+		glDisableVertexAttribArray(1);	
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
