@@ -67,6 +67,7 @@ void adicionaBarras(){
     TwDefine(" GLOBAL help='This example shows how to integrate AntTweakBar with GLFW and OpenGL.' "); // Message added to the help bar.
 
     TwAddVarRW(bar, "Ativar Animacao", TW_TYPE_BOOL8 , &ativo, NULL);{ 
+
     }
     TwAddVarRO(bar, "Game", TW_TYPE_BOOLCPP, &ativo, " true='Andando' false='Pausado' ");{
     }
@@ -375,7 +376,9 @@ void controlSong(){
 
 	if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
 	{
-		FMOD_PlayPause(0);
+		//FMOD_PlayPause(0);
+		killSong();
+		FMOD_Config(MediaPath("CarroAndando.mp3"));
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
@@ -483,18 +486,6 @@ int main(void)
 		deltaTime = currentTime - lastTime;
 		deltaTime2 = currentTime - lastTime2;
 		deltaTime3 = currentTime - lastTime3;
-		 if (deltaTime  >= 0.09 ){ // If last prinf() was more than 5 sec ago
-		// 	 // printf and reset timer
-		 	// printf("%d \n",nbFrames );
-		 	// printf("%f ms/frame/deltaTime\n", 1000.0/double(nbFrames));
-
-		 	 nbFrames = 0;
-		 	if(ativo) {
-		 	// trackAnimation();
-		 	}
-		 	 lastTime += 0.09;
-		 	 
-		 }
 
 		 if (deltaTime2  >= 0.8){ // If last prinf() was more than 5 sec ago
 		// 	 // printf and reset timer
@@ -543,6 +534,16 @@ int main(void)
 			joguinho = true;
 			ativo = true;
 		}
+
+		if (deltaTime  >= 0.09 ){ // If last prinf() was more than 5 sec ago
+		 	 nbFrames = 0;
+			if(ativo) {
+				trackAnimation2();
+			}
+			 lastTime += 0.09;
+		}
+		 
+
 		char text[256];
 		if(joguinho) {
 			MatrizCombinada = glm::mat3(1.0f);
