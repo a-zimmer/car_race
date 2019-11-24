@@ -30,10 +30,11 @@ Shape g_CurrentShape = SHAPE_TORUS;
 
 const GLint WIDTH = 800, HEIGHT = 600;
 const GLfloat R = 0.0f, G = 0.0f, B = 0.3f, A = 0.0f;
+float CR, CG, CB;
 
 bool gLookAtOther = true;
 double zoom = 1.0f, g_Rotation = 0, g_LightDirection[] = { -0.57735f, -0.57735f, -0.57735f };
-double g_MatAmbient[] = { 0.5f, 0.0f, 0.0f, 1.0f };
+
 
 
 GLuint colorbuffer, vertexbuffer;
@@ -50,6 +51,10 @@ glm::mat3 pistaMovement = glm::mat3(1.0f);
 glm::mat3 objectTranslation = glm::mat3(1.0f);
 static std::vector<char *> gPathList;
 
+//Menu
+bool ativo = false;
+int g_CurrentPlaca = 2;
+vec3 g_MatAmbient= vec3(1.0f, 0.0f, 0.0f);
 
 void adicionaBarras(){
 	// Initialize the GUI
@@ -61,24 +66,24 @@ void adicionaBarras(){
 	TwSetParam(bar, NULL, "refresh", TW_PARAM_CSTRING, 1, "0.1");
     TwDefine(" GLOBAL help='This example shows how to integrate AntTweakBar with GLFW and OpenGL.' "); // Message added to the help bar.
 
-    TwAddVarRW(bar, "Habilita Zoom", TW_TYPE_BOOL8 , &gLookAtOther, NULL);
-    TwAddVarRW(bar, "zoom", TW_TYPE_DOUBLE, &zoom, 
-               " label='zoom' min=0 max=20 step=0.001  help='Incrementa e decrementa o triangulo' ");
-
-    TwAddVarRW(bar, "ObjRotation", TW_TYPE_QUAT4F, &g_Rotation, 
-               " label='Object rotation' opened=true help='Change the object orientation.' ");
-   	TwAddVarRW(bar, "LightDir", TW_TYPE_DIR3F, &g_LightDirection, 
-               " label='Light direction' opened=true help='Change the light direction.' ");
-   	TwAddVarRW(bar, "Ambient", TW_TYPE_COLOR3F, &g_MatAmbient, " group='Material' ");
-
-   {
-        // ShapeEV associates Shape enum values with labels that will be displayed instead of enum values
-        TwEnumVal shapeEV[NUM_SHAPES] = { {SHAPE_TEAPOT, "Teapot"}, {SHAPE_TORUS, "Torus"}, {SHAPE_CONE, "Cone"} };
-        // Create a type for the enum shapeEV
-        TwType shapeType = TwDefineEnum("ShapeType", shapeEV, NUM_SHAPES);
-        // add 'g_CurrentShape' to 'bar': this is a variable of type ShapeType. Its key shortcuts are [<] and [>].
-        TwAddVarRW(bar, "Shape", shapeType, &g_CurrentShape, " keyIncr='<' keyDecr='>' help='Change object shape.' ");
+    TwAddVarRW(bar, "Ativar Animacao", TW_TYPE_BOOL8 , &ativo, NULL);{ 
     }
+    TwAddVarRO(bar, "Game", TW_TYPE_BOOLCPP, &ativo, " true='Andando' false='Pausado' ");{
+    }
+    
+    TwAddVarRW(bar, "Cor Carrinho", TW_TYPE_COLOR3F, &g_MatAmbient,"colormode=rgb");
+
+   {	
+
+        // vetorOpcao associa a placa com o valor da label
+        TwEnumVal vetorOpcao[2] = { {1, "Carrinho Azul"}, {2, "Carrinho Preto"}};
+        // Create a type for the enum vetorOpcao
+        TwType tipoPlaca = TwDefineEnum("TipoCarrinho", vetorOpcao, 2);
+        // add 'g_CurrentShape' to 'bar': this is a variable of type ShapeType. Its key shortcuts are [<] and [>].
+        TwAddVarRW(bar, "Carrinho", tipoPlaca, &g_CurrentPlaca, " keyIncr='<' keyDecr='>' help='Selecione a placa.' ");
+    }
+    
+
 }
 
 
@@ -195,7 +200,7 @@ void KeyboardMovementObject(double deltaTime, double deltaTime2){
 			objectTranslation[1][2] -= 0.05f;
     }
 }
-void trackAnimation(double deltaTime, double deltaTime2) {
+void trackAnimation() {
 	if (pistaMovement[1][2] == 0.0) {
         	pistaMovement[1][2] -= 0.5f;
         	//printf("Pista Move\n");
@@ -222,7 +227,7 @@ float velocidadeObject = 0.005f;
 int nCarrinhos = 1;
 void objectAnimation() {
 	
-	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+	//if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
         printf("randomPosition: %d\n", randomPosition);
 
 		if (objectTranslation[1][2] < -2.0f) {
@@ -251,7 +256,7 @@ void objectAnimation() {
 			printf("Velocidade do objeto: %f \n", velocidadeObject);
             printf("Object Movement 0.\n");
         }
-    }
+    //}
 }
 
 void configLayout(GLuint vertexbuffer, GLuint colorbuffer){
@@ -454,11 +459,11 @@ int main(void)
 	FMOD_PlayPause(1);
 
 //AAA
-	double lastTime2;
-	double lastTime = lastTime2 = glfwGetTime();
- 	int nbFrames = 0, nbFrames2=0;
+	double lastTime2,lastTime3;
+	double lastTime = lastTime2 = lastTime3 = glfwGetTime();
+ 	int nbFrames = 0, nbFrames2=0, nbFrames3=0;
 	// Measure speed
-	double deltaTime = 0,deltaTime2 = 0,currentTime;
+	double deltaTime = 0,deltaTime2 = 0,deltaTime3 = 0,currentTime;
 	translation[1][2] = -0.7; //Inicia o carro la em baixo na posiçao -0.7;
 	objectTranslation[1][2] = -0.1;
 
@@ -471,13 +476,16 @@ int main(void)
 		nbFrames++;
 		deltaTime = currentTime - lastTime;
 		deltaTime2 = currentTime - lastTime2;
+		deltaTime3 = currentTime - lastTime3;
 		 if (deltaTime  >= 0.09 ){ // If last prinf() was more than 5 sec ago
 		// 	 // printf and reset timer
 		 	// printf("%d \n",nbFrames );
 		 	// printf("%f ms/frame/deltaTime\n", 1000.0/double(nbFrames));
 
 		 	 nbFrames = 0;
-		 	 trackAnimation(deltaTime, deltaTime2);
+		 	if(ativo) {
+		 	 trackAnimation();
+		 	}
 		 	 lastTime += 0.09;
 		 	 
 		 }
@@ -492,7 +500,17 @@ int main(void)
 		 	 esquerda = 0;
 		 	 direita = 1;
 		 	 KeyboardMovementObject(deltaTime, deltaTime2);
-		 }	
+		 }
+		 if (deltaTime3  >= 0.05){ // If last prinf() was more than 5 sec ago
+		// 	 // printf and reset timer
+		 	// printf("%d \n",nbFrames3 );
+		 	 //printf("%f ms/frame/deltaTime3\n", 1000.0/double(nbFrames3));
+		 	 nbFrames3 = 0;
+		 	 lastTime3 += 0.001;
+		 	 if(ativo) {
+		 	 	objectAnimation();
+		 	 }
+		 }
 
 		 esquerda = 1;
 		 direita = 0;
@@ -507,7 +525,7 @@ int main(void)
 		//KeyboardMovementObject(deltaTime, deltaTime2);
 		//trackAnimation(deltaTime, deltaTime2);
 		turboAnimation(deltaTime, deltaTime2);
-		objectAnimation();
+		
 
 
 		MatrizCombinada = glm::mat3(1.0f);
@@ -526,9 +544,11 @@ int main(void)
 		MatrizCombinada = objectTranslation;
 		drawModel(verticesCar2, MatrizCombinada, MatrixID, 0.0, 0.0, 1.0);
  		glm::vec4 carrinhoTwo = getCarrinhoBox(verticesCar2);
+
 		//Som Colisão, Score, GAMEOVER
 		if(intersect(carrinhoOne, carrinhoTwo, translation, objectTranslation)) {
 			sprintf(text,"GAME OVER");
+			printText2D(text, 400, 400, 100);
 		}else {
 			score++;
 		};
@@ -539,8 +559,7 @@ int main(void)
 
 		
 		sprintf(text,"Score:%d",score);
-		printText2D(text, 10, 50, 60);
-
+		printText2D(text, 525, 560, 25);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
