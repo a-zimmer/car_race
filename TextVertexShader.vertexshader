@@ -1,0 +1,22 @@
+#version 330 core
+
+// dados do vértice de entrada
+layout(location = 0) in vec2 vertexPosition_screenspace;
+layout(location = 1) in vec2 vertexUV;
+
+// Output data ; will be interpolated for each fragment.
+out vec2 UV;
+
+void main(){
+
+	// map position [0..800][0..600] to [-1..1][-1..1]
+	// [0..800][0..600] -> [-400..400][-300..300]
+	vec2 vertexPosition_homoneneousSpace = vertexPosition_screenspace - vec2(400,300); 
+	vertexPosition_homoneneousSpace /= vec2(400,300);
+	
+	gl_Position =  vec4(vertexPosition_homoneneousSpace,0,1);
+	
+	// UV of the vertex. No special space for this one.
+	UV = vertexUV;
+}
+
