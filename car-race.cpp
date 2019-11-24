@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 // Include GLEW
 #include <GL/glew.h>
@@ -16,10 +17,25 @@ GLFWwindow* window;
 using namespace glm;
 
 #include "common/shader.hpp"
-//#include "common/song.hpp"
+#include "common/text2D.hpp"
+//FMOD bib audio manipulator
+#include "common/song.hpp"
+// Include AntTweakBar
+#include "AntTweakBar/include/AntTweakBar.h"
+
+
+#define NUM_SHAPES 3
+typedef enum { SHAPE_TEAPOT=1, SHAPE_TORUS, SHAPE_CONE } Shape;
+Shape g_CurrentShape = SHAPE_TORUS;
 
 const GLint WIDTH = 800, HEIGHT = 600;
 const GLfloat R = 0.0f, G = 0.0f, B = 0.3f, A = 0.0f;
+
+bool gLookAtOther = true;
+double zoom = 1.0f, g_Rotation = 0, g_LightDirection[] = { -0.57735f, -0.57735f, -0.57735f };
+double g_MatAmbient[] = { 0.5f, 0.0f, 0.0f, 1.0f };
+
+
 GLuint colorbuffer, vertexbuffer;
 double xposMouse, yposMouse;
 int widthWindow, heightWindow, randomPosition = 1;
@@ -32,7 +48,38 @@ glm::mat3 escala = glm::mat3(1.0f);
 glm::mat3 rotacao = glm::mat3(1.0f);
 glm::mat3 pistaMovement = glm::mat3(1.0f);
 glm::mat3 objectTranslation = glm::mat3(1.0f);
+static std::vector<char *> gPathList;
 
+
+void adicionaBarras(){
+	// Initialize the GUI
+	TwInit(TW_OPENGL_CORE, NULL);
+	TwWindowSize(WIDTH, HEIGHT);//Alterar tamanho da Janela
+
+	TwBar * bar = TwNewBar("TweakBar");
+	TwSetParam(bar, NULL, "position", TW_PARAM_CSTRING, 1, "10 10");
+	TwSetParam(bar, NULL, "refresh", TW_PARAM_CSTRING, 1, "0.1");
+    TwDefine(" GLOBAL help='This example shows how to integrate AntTweakBar with GLFW and OpenGL.' "); // Message added to the help bar.
+
+    TwAddVarRW(bar, "Habilita Zoom", TW_TYPE_BOOL8 , &gLookAtOther, NULL);
+    TwAddVarRW(bar, "zoom", TW_TYPE_DOUBLE, &zoom, 
+               " label='zoom' min=0 max=20 step=0.001  help='Incrementa e decrementa o triangulo' ");
+
+    TwAddVarRW(bar, "ObjRotation", TW_TYPE_QUAT4F, &g_Rotation, 
+               " label='Object rotation' opened=true help='Change the object orientation.' ");
+   	TwAddVarRW(bar, "LightDir", TW_TYPE_DIR3F, &g_LightDirection, 
+               " label='Light direction' opened=true help='Change the light direction.' ");
+   	TwAddVarRW(bar, "Ambient", TW_TYPE_COLOR3F, &g_MatAmbient, " group='Material' ");
+
+   {
+        // ShapeEV associates Shape enum values with labels that will be displayed instead of enum values
+        TwEnumVal shapeEV[NUM_SHAPES] = { {SHAPE_TEAPOT, "Teapot"}, {SHAPE_TORUS, "Torus"}, {SHAPE_CONE, "Cone"} };
+        // Create a type for the enum shapeEV
+        TwType shapeType = TwDefineEnum("ShapeType", shapeEV, NUM_SHAPES);
+        // add 'g_CurrentShape' to 'bar': this is a variable of type ShapeType. Its key shortcuts are [<] and [>].
+        TwAddVarRW(bar, "Shape", shapeType, &g_CurrentShape, " keyIncr='<' keyDecr='>' help='Change object shape.' ");
+    }
+}
 
 
 int initWindow ()
@@ -71,7 +118,21 @@ int initWindow ()
 		glfwTerminate();
 		return -1;
 	}
+	adicionaBarras();
 
+	glfwSetMouseButtonCallback(window, (GLFWmousebuttonfun)TwEventMouseButtonGLFW); // - Directly redirect GLFW mouse button events to AntTweakBar
+	glfwSetCursorPosCallback(window, (GLFWcursorposfun)TwEventMousePosGLFW);          // - Directly redirect GLFW mouse position events to AntTweakBar
+	glfwSetScrollCallback(window, (GLFWscrollfun)TwEventMouseWheelGLFW);    // - Directly redirect GLFW mouse wheel events to AntTweakBar
+	glfwSetKeyCallback(window, (GLFWkeyfun)TwEventKeyGLFW);                         // - Directly redirect GLFW key events to AntTweakBar
+	glfwSetCharCallback(window, (GLFWcharfun)TwEventCharGLFW);                      // - Directly redirect GLFW char events to AntTweakBar
+ 
+	// Ensure we can capture the escape key being pressed below
+	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+    // Hide the mouse and enable unlimited mouvement
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);//Alterado
+    
+    // Set the mouse at the center of the screen
+    glfwPollEvents();
 
 	glClearColor(R, G, B, A);
 	//Habilita a captura das teclas retornando GLFW_PRESS pela funcao glfwGetKey()
@@ -87,6 +148,12 @@ void destroyWindows (GLuint vertexbuffer, GLuint VertexArrayID, GLuint programID
 	glDeleteBuffers(1, &vertexbuffer);
 	glDeleteVertexArrays(1, &VertexArrayID);
 	glDeleteProgram(programID);
+	// Delete the text's VBO, the shader and the texture
+	cleanupText2D();
+	//kill song
+
+	killSong();
+	TwTerminate();
 	glfwTerminate();
 }
 
@@ -267,6 +334,63 @@ void drawModel(std::vector<glm::vec2> vertices, glm::mat3 MatrizCombinada,
 
 }
 
+char *MediaPath(const char *fileName)
+{
+    char *filePath = (char *)calloc(256, sizeof(char));
+  
+    ssize_t len = readlink("/proc/self/exe", filePath, 256);
+    assert(len != -1);
+    
+    char *filePathEnd = strrchr(filePath, '/');
+    assert (filePathEnd != NULL);
+
+    filePathEnd++; // Move past the last slash
+    filePathEnd[0] = '\0';
+
+    strcat(filePath, "common/media/");
+    strcat(filePath, fileName);
+    gPathList.push_back(filePath);
+
+    return filePath;
+}
+
+void controlSong(){
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	{
+		decreaseVolume();
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	{
+		increaseVolume();
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
+	{
+		FMOD_PlayPause(0);
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+	{
+		FMOD_PlayPause(1);
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	{
+		killSong();
+		FMOD_Config(MediaPath("stereo.ogg"));
+		killSong();
+		FMOD_Config(MediaPath("standrews.wav"));
+		
+	}
+	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
+	{
+		killSong();
+		FMOD_Config(MediaPath("swish.wav"));
+		
+	}
+}
+
 glm::vec4 getCarrinhoBox(std::vector<glm::vec2> objeto) {
 	glm::vec4 box;
 	float xMax = objeto[0].x, yMax = objeto[0].y, xMin = objeto[0].x, yMin = objeto[0].y;
@@ -318,6 +442,7 @@ int main(void)
 	GLuint MatrixID = glGetUniformLocation(programID, "MatrizCombinada");
 	glLineWidth(5.0f);
 	glm::mat3 MatrizCombinada = glm::mat3(1.0f);
+	initText2D( "Holstein.DDS" );
 
 	std::vector<glm::vec2> verticesCar1 = loadModel("data/car1.txt");
 	std::vector<glm::vec2> verticesCar2 = loadModel("data/car2.txt");
@@ -325,7 +450,10 @@ int main(void)
 	std::vector<glm::vec2> verticesPistas = loadModel("data/pistas.txt");
 	std::vector<glm::vec2> verticesFaixas = loadModel("data/faixas.txt");
 
+	FMOD_Config(MediaPath("standrews.wav"));
+	FMOD_PlayPause(1);
 
+//AAA
 	double lastTime2;
 	double lastTime = lastTime2 = glfwGetTime();
  	int nbFrames = 0, nbFrames2=0;
@@ -333,7 +461,9 @@ int main(void)
 	double deltaTime = 0,deltaTime2 = 0,currentTime;
 	translation[1][2] = -0.7; //Inicia o carro la em baixo na posiçao -0.7;
 	objectTranslation[1][2] = -0.1;
+
 	do{
+		controlSong();
 		bool colision = false;
 		int score = 0;
 		//Medindo Velocidade
@@ -389,22 +519,29 @@ int main(void)
 
 
 		
-
+		char text[256];
 		MatrizCombinada = translation;
 		drawModel(verticesCar1, MatrizCombinada, MatrixID, 1.0, 0.0, 0.0);
 		glm::vec4 carrinhoOne = getCarrinhoBox(verticesCar1);
 		MatrizCombinada = objectTranslation;
 		drawModel(verticesCar2, MatrizCombinada, MatrixID, 0.0, 0.0, 1.0);
  		glm::vec4 carrinhoTwo = getCarrinhoBox(verticesCar2);
-		//Som Colisão
+		//Som Colisão, Score, GAMEOVER
 		if(intersect(carrinhoOne, carrinhoTwo, translation, objectTranslation)) {
-			printf("GAME OVER!!!\n");
+			sprintf(text,"GAME OVER");
 		}else {
 			score++;
 		};
 
+		TwDraw();
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
+
+		
+		sprintf(text,"Score:%d",score);
+		printText2D(text, 10, 50, 60);
+
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
