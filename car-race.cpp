@@ -64,7 +64,7 @@ void adicionaBarras() {
 	TwSetParam(bar, NULL, "refresh", TW_PARAM_CSTRING, 1, "0.1");
     TwDefine(" GLOBAL help='This example shows how to integrate AntTweakBar with GLFW and OpenGL.' "); // Message added to the help bar.
 
-    TwAddVarRW(bar, "Ativar Animacao", TW_TYPE_BOOL8 , &ativo, NULL);
+    TwAddVarRW(bar, "Ativar Animacao", TW_TYPE_BOOL8 , &ativo, NULL);    
     TwAddVarRO(bar, "Game", TW_TYPE_BOOLCPP, &ativo, " true='Andando' false='Pausado' ");
     TwAddVarRW(bar, "Cor Carrinho", TW_TYPE_COLOR3F, &g_MatAmbient,"colormode=rgb");
    {
@@ -372,6 +372,36 @@ void controlSong(){
 	}
 }
 
+
+//float Red,Green,Blue;
+GLfloat Red =1.0 ,Green =0.0 ,Blue =0.0; 
+void changeCarColor() {
+	//Preto
+	if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+	{
+			Red = 0.0;
+			Green = 1.0;
+			Blue = 0.0;
+
+	}
+	//Azul
+	if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+	{
+			Red = 0.0;
+			Green = 0.0;
+			Blue = 1.0;
+
+	}
+	//Red
+	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+	{
+			Red = 1.0;
+			Green = 0.0;
+			Blue = 0.0;
+
+	}
+}
+
 glm::vec4 getCarrinhoBox(std::vector<glm::vec2> objeto) {
 	glm::vec4 box;
 	float xMax = objeto[0].x, yMax = objeto[0].y, xMin = objeto[0].x, yMin = objeto[0].y;
@@ -451,6 +481,7 @@ int main(void)
 
 	bool joguinho = false;
 	do{
+		changeCarColor();
 		controlSong();
 		bool colision = false;
 		int score = 0;
@@ -519,7 +550,7 @@ int main(void)
 			drawModel(verticesFaixas, MatrizCombinada, MatrixID, 1.0, 1.0, 1.0);
 
 			MatrizCombinada = translation;
-			drawModel(verticesCar1, MatrizCombinada, MatrixID, 1.0, 0.0, 0.0);
+			drawModel(verticesCar1, MatrizCombinada, MatrixID, Red, Green, Blue);
 			glm::vec4 carrinhoOne = getCarrinhoBox(verticesCar1);
 			MatrizCombinada = objectTranslation;
 			drawModel(verticesCar2, MatrizCombinada, MatrixID, 0.0, 0.0, 1.0);
@@ -539,6 +570,7 @@ int main(void)
 			} else {
 				score++;
 			};
+			score++;
             char text[256];
 			TwDraw();
 			sprintf(text,"Score: %d",score);
