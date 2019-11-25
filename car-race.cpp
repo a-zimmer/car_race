@@ -424,7 +424,7 @@ glm::vec4 getCarrinhoBox(std::vector<glm::vec2> objeto) {
         }
     }
 
-    // printf("IMPRIME: \nxMax:%f\nyMax:%f\nxMin:%f\nyMin:%f\n",xMax,yMax,xMin,yMin);
+     //printf("IMPRIME: \nxMax:%f\nyMax:%f\nxMin:%f\nyMin:%f\n",xMax,yMax,xMin,yMin);
     box = glm::vec4(xMax,yMax,xMin,yMin);
 	return box;
 }
@@ -434,10 +434,15 @@ int intersect(glm::vec4 carrinhoUm,glm::vec4 carrinhoDois, glm::mat3 matrizDeTra
 //	yMax = [1];
 //	xMin = [2];
 //	yMin = [3];
-    return ((carrinhoUm[2] + matrizDeTranslation[0][2] >= carrinhoDois[0] + matrizDeTranslation2[0][2])
-        && (carrinhoUm[0] + matrizDeTranslation[0][2] <= carrinhoDois[2] + matrizDeTranslation2[0][2]) &&
+    return ((carrinhoUm[2] + matrizDeTranslation[1][2] >= carrinhoDois[0] + matrizDeTranslation2[1][2])
+        && (carrinhoUm[0] + matrizDeTranslation[1][2] <= carrinhoDois[2] + matrizDeTranslation2[1][2]) &&
         (carrinhoUm[3] + matrizDeTranslation[1][2] >= carrinhoDois[1] + matrizDeTranslation2[1][2])
         && (carrinhoUm[1] + matrizDeTranslation[1][2] <= carrinhoDois[3] + matrizDeTranslation2[1][2]));
+}
+
+int colisao(glm::vec4 carrinhoUm,glm::vec4 carrinhoDois, glm::mat3 matrizDeTranslation, glm::mat3 matrizDeTranslation2) {
+	return 1;
+
 }
 
 int main(void)
@@ -480,11 +485,12 @@ int main(void)
 	objectTranslation[1][2] = -0.1;
 
 	bool joguinho = false;
+	int score = 0;
 	do{
 		changeCarColor();
 		controlSong();
 		bool colision = false;
-		int score = 0;
+		//int score = 0;
 		//Medindo Velocidade
 		currentTime = glfwGetTime();
 		nbFrames++;
@@ -505,6 +511,9 @@ int main(void)
 		 	 if(ativo) {
 		 	 	objectAnimation();
 		 	 }
+		 	 if(objectTranslation[1][2] < -2.0f) {
+				score++;
+			}
 		 }
 
 		 esquerda = 1;
@@ -558,6 +567,7 @@ int main(void)
 
 			//Som Colisão, Score, GAMEOVER
 			if(intersect(carrinhoOne, carrinhoTwo, translation, objectTranslation)) {
+				glClear(GL_COLOR_BUFFER_BIT);
                 killSong();
 		        FMOD_Config(MediaPath("gameOver.mp3"));
                 drawModel(verticesTelaFinal, MatrizCombinada, MatrixID, 0.0, 0.0, 0.0);
@@ -567,10 +577,9 @@ int main(void)
 
                 joguinho = false;
                 ativo = false;
-			} else {
-				score++;
-			};
-			score++;
+			} 
+
+			
             char text[256];
 			TwDraw();
 			sprintf(text,"Score: %d",score);
