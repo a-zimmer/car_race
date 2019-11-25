@@ -28,14 +28,12 @@ using namespace glm;
 typedef enum { SHAPE_TEAPOT=1, SHAPE_TORUS, SHAPE_CONE } Shape;
 Shape g_CurrentShape = SHAPE_TORUS;
 
-const GLint WIDTH = 800, HEIGHT = 600;
+const GLint WIDTH = 800, HEIGHT = 800;
 const GLfloat R = 0.0f, G = 0.0f, B = 0.3f, A = 0.0f;
 float CR, CG, CB;
 
 bool gLookAtOther = true;
 double zoom = 1.0f, g_Rotation = 0, g_LightDirection[] = { -0.57735f, -0.57735f, -0.57735f };
-
-
 
 GLuint colorbuffer, vertexbuffer;
 double xposMouse, yposMouse;
@@ -56,7 +54,7 @@ bool ativo = false;
 int g_CurrentPlaca = 2;
 vec3 g_MatAmbient= vec3(1.0f, 0.0f, 0.0f);
 
-void adicionaBarras(){
+void adicionaBarras() {
 	// Initialize the GUI
 	TwInit(TW_OPENGL_CORE, NULL);
 	TwWindowSize(WIDTH, HEIGHT);//Alterar tamanho da Janela
@@ -66,16 +64,10 @@ void adicionaBarras(){
 	TwSetParam(bar, NULL, "refresh", TW_PARAM_CSTRING, 1, "0.1");
     TwDefine(" GLOBAL help='This example shows how to integrate AntTweakBar with GLFW and OpenGL.' "); // Message added to the help bar.
 
-    TwAddVarRW(bar, "Ativar Animacao", TW_TYPE_BOOL8 , &ativo, NULL);{ 
-
-    }
-    TwAddVarRO(bar, "Game", TW_TYPE_BOOLCPP, &ativo, " true='Andando' false='Pausado' ");{
-    }
-    
+    TwAddVarRW(bar, "Ativar Animacao", TW_TYPE_BOOL8 , &ativo, NULL);
+    TwAddVarRO(bar, "Game", TW_TYPE_BOOLCPP, &ativo, " true='Andando' false='Pausado' ");
     TwAddVarRW(bar, "Cor Carrinho", TW_TYPE_COLOR3F, &g_MatAmbient,"colormode=rgb");
-
-   {	
-
+   {
         // vetorOpcao associa a placa com o valor da label
         TwEnumVal vetorOpcao[2] = { {1, "Carrinho Azul"}, {2, "Carrinho Preto"}};
         // Create a type for the enum vetorOpcao
@@ -83,8 +75,6 @@ void adicionaBarras(){
         // add 'g_CurrentShape' to 'bar': this is a variable of type ShapeType. Its key shortcuts are [<] and [>].
         TwAddVarRW(bar, "Carrinho", tipoPlaca, &g_CurrentPlaca, " keyIncr='<' keyDecr='>' help='Selecione a placa.' ");
     }
-    
-
 }
 
 
@@ -131,12 +121,12 @@ int initWindow ()
 	glfwSetScrollCallback(window, (GLFWscrollfun)TwEventMouseWheelGLFW);    // - Directly redirect GLFW mouse wheel events to AntTweakBar
 	glfwSetKeyCallback(window, (GLFWkeyfun)TwEventKeyGLFW);                         // - Directly redirect GLFW key events to AntTweakBar
 	glfwSetCharCallback(window, (GLFWcharfun)TwEventCharGLFW);                      // - Directly redirect GLFW char events to AntTweakBar
- 
+
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
     // Hide the mouse and enable unlimited mouvement
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);//Alterado
-    
+
     // Set the mouse at the center of the screen
     glfwPollEvents();
 
@@ -163,17 +153,12 @@ void destroyWindows (GLuint vertexbuffer, GLuint VertexArrayID, GLuint programID
 	glfwTerminate();
 }
 
-
-
 void KeyboardMovementObject(double deltaTime, double deltaTime2){
 	glfwGetCursorPos(window, &xposMouse, &yposMouse);
 	glfwGetWindowSize(window,&widthWindow, &heightWindow);
 	double horizontal = double(xposMouse * 2 - widthWindow)/double(widthWindow);
 	double vertical = double(heightWindow - yposMouse * 2)/double(heightWindow);
-	//printf("%lf %lf\n",xposMouse,yposMouse);
-	//printf("%lf %lf\n",horizontal,vertical);
 	translation[1][2] = -0.7; //Inicia o carro la em baixo na posiçao -0.7;
-	//objectTranslation[1][2] = -0.1f;
 
 	//Colocar FLAG DIREITA E ESQUERDA;
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && direita == 1) { // Right
@@ -188,19 +173,9 @@ void KeyboardMovementObject(double deltaTime, double deltaTime2){
         } else if (translation[0][2] == 0.5) {
             translation[0][2] = 0.0f;
         }
-    } else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) { // Left
-        if (pistaMovement[1][2] == 0.0) { // Testes de Movementação da pista
-        	pistaMovement[1][2] -= 0.5f;
-        	printf("MACONHA\n");
-    } else if (pistaMovement[1][2] == -0.5f){
-    		pistaMovement[1][2] = 0.0f;
-    		printf("MACONHA2\n");
-    	}
-    } else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) { // DOWN
-        	objectTranslation[0][2] -= 0.00f;//TESTE pr baixo
-			objectTranslation[1][2] -= 0.05f;
     }
 }
+
 void trackAnimation() {
 	if (pistaMovement[1][2] == 0.0) {
         	pistaMovement[1][2] -= 0.5f;
@@ -210,9 +185,6 @@ void trackAnimation() {
     		//printf("Pista Move 2\n");
     	}
 
-}
-void trackAnimation2() {
-	 pistaMovement[1][2] -= 0.05;
 }
 
 void turboAnimation(double deltaTime, double deltaTime2) {
@@ -230,37 +202,28 @@ void turboAnimation(double deltaTime, double deltaTime2) {
 float velocidadeObject = 0.005f;
 int nCarrinhos = 1;
 void objectAnimation() {
-	
-	//if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
-        printf("randomPosition: %d\n", randomPosition);
+    if (objectTranslation[1][2] < -2.0f) {
+        randomPosition = rand() % 3;
+        objectTranslation[1][2] = -0.1f;
+        nCarrinhos++;
+    }
 
-		if (objectTranslation[1][2] < -2.0f) {
-			nCarrinhos += 1;
-            randomPosition = rand() % 3;
-			objectTranslation[1][2] = -0.1f;
-			velocidadeObject += sqrt(nCarrinhos)/5000;
-			printf("TEST IF RANDOM\n");
-		}
-        if (randomPosition == 2) {
-        	objectTranslation[0][2]  = 0.5f;
-			objectTranslation[1][2] -= velocidadeObject;
-            printf("Object Movement 2.\n");
-        }
+    velocidadeObject = sqrt(nCarrinhos)/100;
+    // printf("velocidadeObject: %f\n", velocidadeObject);
+    if (randomPosition == 2) {
+        objectTranslation[0][2]  = 0.5f;
+        objectTranslation[1][2] -= velocidadeObject;
+    }
 
-        if (randomPosition == 1) {
-        	objectTranslation[0][2]  = 0.00f;
-			objectTranslation[1][2] -= velocidadeObject;
-			
-            printf("Object Movement 1.\n");
-        }
+    if (randomPosition == 1) {
+        objectTranslation[0][2]  = 0.00f;
+        objectTranslation[1][2] -= velocidadeObject;
+    }
 
-        if (randomPosition == 0) {
-        	objectTranslation[0][2]  = -0.5f;
-			objectTranslation[1][2] -= velocidadeObject;
-			printf("Velocidade do objeto: %f \n", velocidadeObject);
-            printf("Object Movement 0.\n");
-        }
-    //}
+    if (randomPosition == 0) {
+        objectTranslation[0][2]  = -0.5f;
+        objectTranslation[1][2] -= velocidadeObject;
+    }
 }
 
 void configLayout(GLuint vertexbuffer, GLuint colorbuffer){
@@ -346,10 +309,10 @@ void drawModel(std::vector<glm::vec2> vertices, glm::mat3 MatrizCombinada,
 char *MediaPath(const char *fileName)
 {
     char *filePath = (char *)calloc(256, sizeof(char));
-  
+
     ssize_t len = readlink("/proc/self/exe", filePath, 256);
     assert(len != -1);
-    
+
     char *filePathEnd = strrchr(filePath, '/');
     assert (filePathEnd != NULL);
 
@@ -392,13 +355,13 @@ void controlSong(){
 		FMOD_Config(MediaPath("stereo.ogg"));
 		killSong();
 		FMOD_Config(MediaPath("standrews.wav"));
-		
+
 	}
 	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
 	{
 		killSong();
 		FMOD_Config(MediaPath("swish.wav"));
-		
+
 	}
 }
 
@@ -407,19 +370,25 @@ glm::vec4 getCarrinhoBox(std::vector<glm::vec2> objeto) {
 	float xMax = objeto[0].x, yMax = objeto[0].y, xMin = objeto[0].x, yMin = objeto[0].y;
 
 	for(int point = 0; point < objeto.size(); point++) {
-		//printf("Objeto: %f\n", objeto[point].x);
-			if (xMax > objeto[point].x) {
-				xMax = objeto[point].x;
-			}if (xMin < objeto[point].x){
-				xMin = objeto[point].x;
-			}if (yMax > objeto[point].y){
-				yMax = objeto[point].y;
-			}if (yMin < objeto[point].y){
-				yMin = objeto[point].y;
-			};
-		}
-		printf("IMPRIME: \nxMax:%f\nyMax:%f\nxMin:%f\nyMin:%f\n",xMax,yMax,xMin,yMin);
-		box = glm::vec4(xMax,yMax,xMin,yMin);
+        if (xMax < objeto[point].x) {
+            xMax = objeto[point].x;
+        }
+
+        if (xMin > objeto[point].x) {
+            xMin = objeto[point].x;
+        }
+
+        if (yMax < objeto[point].y) {
+            yMax = objeto[point].y;
+        }
+
+        if (yMin > objeto[point].y) {
+            yMin = objeto[point].y;
+        }
+    }
+
+    // printf("IMPRIME: \nxMax:%f\nyMax:%f\nxMin:%f\nyMin:%f\n",xMax,yMax,xMin,yMin);
+    box = glm::vec4(xMax,yMax,xMin,yMin);
 	return box;
 }
 
@@ -428,13 +397,11 @@ int intersect(glm::vec4 carrinhoUm,glm::vec4 carrinhoDois, glm::mat3 matrizDeTra
 //	yMax = [1];
 //	xMin = [2];
 //	yMin = [3];
-if ((carrinhoUm[2] + matrizDeTranslation[0][2] <= carrinhoDois[0] + matrizDeTranslation2[0][2])
- 	&& (carrinhoUm[0] + matrizDeTranslation[0][2] >= carrinhoDois[2] + matrizDeTranslation2[0][2]) &&
-    (carrinhoUm[3] + matrizDeTranslation[0][2] <= carrinhoDois[1] + matrizDeTranslation2[0][2])
-    && (carrinhoUm[1] + matrizDeTranslation[0][2] >= carrinhoDois[3] + matrizDeTranslation2[0][2])){
-    	return 1;
-    };
-};
+    return ((carrinhoUm[2] + matrizDeTranslation[0][2] >= carrinhoDois[0] + matrizDeTranslation2[0][2])
+        && (carrinhoUm[0] + matrizDeTranslation[0][2] <= carrinhoDois[2] + matrizDeTranslation2[0][2]) &&
+        (carrinhoUm[3] + matrizDeTranslation[1][2] >= carrinhoDois[1] + matrizDeTranslation2[1][2])
+        && (carrinhoUm[1] + matrizDeTranslation[1][2] <= carrinhoDois[3] + matrizDeTranslation2[1][2]));
+}
 
 int main(void)
 {
@@ -460,6 +427,7 @@ int main(void)
 	std::vector<glm::vec2> verticesMuro = loadModel("data/muro.txt");
 	std::vector<glm::vec2> verticesPistas = loadModel("data/pistas.txt");
 	std::vector<glm::vec2> verticesFaixas = loadModel("data/faixas.txt");
+	std::vector<glm::vec2> verticesTelaFinal = loadModel("data/telaFinal.txt");
 	std::vector<glm::vec2> verticesTelaInicial = loadModel("data/telaInicial.txt");
 
 	FMOD_Config(MediaPath("standrews.wav"));
@@ -474,7 +442,6 @@ int main(void)
 	translation[1][2] = -0.7; //Inicia o carro la em baixo na posiçao -0.7;
 	objectTranslation[1][2] = -0.1;
 
-	
 	bool joguinho = false;
 	do{
 		controlSong();
@@ -487,23 +454,16 @@ int main(void)
 		deltaTime2 = currentTime - lastTime2;
 		deltaTime3 = currentTime - lastTime3;
 
-		 if (deltaTime2  >= 0.8){ // If last prinf() was more than 5 sec ago
-		// 	 // printf and reset timer
-		 	// printf("%d \n",nbFrames2 );
-		 	 //printf("%f ms/frame/deltaTime2\n", 1000.0/double(nbFrames2));
-
+		 if (deltaTime2  >= 0.25) {
 		 	 nbFrames2 = 0;
-		 	 lastTime2 += 0.8;
+		 	 lastTime2 += 0.25;
 		 	 esquerda = 0;
 		 	 direita = 1;
 		 	 KeyboardMovementObject(deltaTime, deltaTime2);
 		 }
-		 if (deltaTime3  >= 0.05){ // If last prinf() was more than 5 sec ago
-		// 	 // printf and reset timer
-		 	// printf("%d \n",nbFrames3 );
-		 	 //printf("%f ms/frame/deltaTime3\n", 1000.0/double(nbFrames3));
+		 if (deltaTime3  >= 0.033) {
 		 	 nbFrames3 = 0;
-		 	 lastTime3 += 0.001;
+		 	 lastTime3 += 0.033;
 		 	 if(ativo) {
 		 	 	objectAnimation();
 		 	 }
@@ -522,13 +482,13 @@ int main(void)
 		//KeyboardMovementObject(deltaTime, deltaTime2);
 		//trackAnimation(deltaTime, deltaTime2);
 		turboAnimation(deltaTime, deltaTime2);
-		if(joguinho == false) {
+        if(joguinho == false) {
 			drawModel(verticesTelaInicial, MatrizCombinada, MatrixID, 0.0, 0.0, 0.0);
 			char telaInicial[256];
 			sprintf(telaInicial,"CAR RACE");
-			printText2D(telaInicial, 130, 400, 70);
-			sprintf(telaInicial,"ENTER PARA JOGAR");
-			printText2D(telaInicial, 170, 300, 30);
+			printText2D(telaInicial, 130, 350, 70);
+			sprintf(telaInicial,"PRESSIONE ENTER PARA JOGAR");
+			printText2D(telaInicial, 10, 280, 30);
 		}
 		if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
 			joguinho = true;
@@ -538,19 +498,16 @@ int main(void)
 		if (deltaTime  >= 0.09 ){ // If last prinf() was more than 5 sec ago
 		 	 nbFrames = 0;
 			if(ativo) {
-				trackAnimation2();
+				trackAnimation();
 			}
 			 lastTime += 0.09;
 		}
-		 
 
-		char text[256];
 		if(joguinho) {
 			MatrizCombinada = glm::mat3(1.0f);
 			drawModel(verticesPistas, MatrizCombinada, MatrixID, 0.0, 0.0, 0.0);
 			MatrizCombinada = pistaMovement;
 			drawModel(verticesMuro, MatrizCombinada, MatrixID, 0.4, 0.4, 0.4);
-			MatrizCombinada = pistaMovement;
 			drawModel(verticesFaixas, MatrizCombinada, MatrixID, 1.0, 1.0, 1.0);
 
 			MatrizCombinada = translation;
@@ -560,22 +517,28 @@ int main(void)
 			drawModel(verticesCar2, MatrizCombinada, MatrixID, 0.0, 0.0, 1.0);
  			glm::vec4 carrinhoTwo = getCarrinhoBox(verticesCar2);
 
- 			
 			//Som Colisão, Score, GAMEOVER
 			if(intersect(carrinhoOne, carrinhoTwo, translation, objectTranslation)) {
+                killSong();
+		        FMOD_Config(MediaPath("gameOver.mp3"));
+                drawModel(verticesTelaFinal, MatrizCombinada, MatrixID, 0.0, 0.0, 0.0);
+                char telaFinal[256];
+                sprintf(telaFinal,"GAME OVER");
+                printText2D(telaFinal, 100, 300, 70);
 
-				sprintf(text,"GAME OVER");
-				printText2D(text, 400, 400, 100);
-			}else {
+                joguinho = false;
+                ativo = false;
+			} else {
 				score++;
 			};
+            char text[256];
 			TwDraw();
-			sprintf(text,"Score:%d",score);
+			sprintf(text,"Score: %d",score);
 			printText2D(text, 525, 560, 25);
 		}
 
 		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);	
+		glDisableVertexAttribArray(1);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
