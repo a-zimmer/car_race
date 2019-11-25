@@ -64,19 +64,9 @@ void adicionaBarras() {
 	TwSetParam(bar, NULL, "refresh", TW_PARAM_CSTRING, 1, "0.1");
     TwDefine(" GLOBAL help='This example shows how to integrate AntTweakBar with GLFW and OpenGL.' "); // Message added to the help bar.
 
-    TwAddVarRW(bar, "Ativar Animacao", TW_TYPE_BOOL8 , &ativo, NULL);    
+    TwAddVarRW(bar, "Ativar Animacao", TW_TYPE_BOOL8 , &ativo, NULL);
     TwAddVarRO(bar, "Game", TW_TYPE_BOOLCPP, &ativo, " true='Andando' false='Pausado' ");
-    TwAddVarRW(bar, "Cor Carrinho", TW_TYPE_COLOR3F, &g_MatAmbient,"colormode=rgb");
-   {
-        // vetorOpcao associa a placa com o valor da label
-        TwEnumVal vetorOpcao[2] = { {1, "Carrinho Azul"}, {2, "Carrinho Preto"}};
-        // Create a type for the enum vetorOpcao
-        TwType tipoPlaca = TwDefineEnum("TipoCarrinho", vetorOpcao, 2);
-        // add 'g_CurrentShape' to 'bar': this is a variable of type ShapeType. Its key shortcuts are [<] and [>].
-        TwAddVarRW(bar, "Carrinho", tipoPlaca, &g_CurrentPlaca, " keyIncr='<' keyDecr='>' help='Selecione a placa.' ");
-    }
 }
-
 
 int initWindow ()
 {
@@ -178,9 +168,9 @@ void KeyboardMovementObject(double deltaTime, double deltaTime2){
 
 void trackAnimation() {
 	if (pistaMovement[1][2] == 0.0) {
-        	pistaMovement[1][2] -= 0.5f;
+        	pistaMovement[1][2] -= 0.3f;
         	//printf("Pista Move\n");
-    } else if (pistaMovement[1][2] == -0.5f){
+    } else if (pistaMovement[1][2] == -0.3f){
     		pistaMovement[1][2] = 0.0f;
     		//printf("Pista Move 2\n");
     	}
@@ -211,7 +201,7 @@ int nCarrinhos = 1;
 void objectAnimation() {
     if (objectTranslation[1][2] < -2.0f) {
         randomPosition = rand() % 3;
-        objectTranslation[1][2] = -0.1f;
+        objectTranslation[1][2] = 0.8f;
         nCarrinhos++;
     }
 
@@ -374,7 +364,7 @@ void controlSong(){
 
 
 //float Red,Green,Blue;
-GLfloat Red =1.0 ,Green =0.0 ,Blue =0.0; 
+GLfloat Red =1.0 ,Green =0.0 ,Blue =0.0;
 void changeCarColor() {
 	//Preto
 	if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
@@ -399,6 +389,41 @@ void changeCarColor() {
 			Green = 0.0;
 			Blue = 0.0;
 
+	}
+}
+
+//float Red,Green,Blue;
+GLfloat pistaRed = 0.0 , pistaGreen =0.0 , pistaBlue =0.0;
+void changePistaColor() {
+	//Verde
+	if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
+	{
+			pistaRed = 0.0;
+			pistaGreen = 1.0;
+			pistaBlue = 0.0;
+
+	}
+	//Azul
+	if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
+	{
+			pistaRed = 0.0;
+			pistaGreen = 0.0;
+			pistaBlue = 1.0;
+
+	}
+	//Red
+	if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
+	{
+			pistaRed = 1.0;
+			pistaGreen = 0.0;
+			pistaBlue = 0.0;
+	}
+	//Black
+	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+	{
+			pistaRed = 0.0;
+			pistaGreen = 0.0;
+			pistaBlue = 0.0;
 	}
 }
 
@@ -482,12 +507,13 @@ int main(void)
 	// Measure speed
 	double deltaTime = 0,deltaTime2 = 0,deltaTime3 = 0,currentTime;
 	translation[1][2] = -0.7; //Inicia o carro la em baixo na posiçao -0.7;
-	objectTranslation[1][2] = -0.1;
+	objectTranslation[1][2] = 0.8f;
 
 	bool joguinho = false;
 	int score = 0;
 	do{
 		changeCarColor();
+		changePistaColor();
 		controlSong();
 		bool colision = false;
 		//int score = 0;
@@ -498,9 +524,9 @@ int main(void)
 		deltaTime2 = currentTime - lastTime2;
 		deltaTime3 = currentTime - lastTime3;
 
-		 if (deltaTime2  >= 0.25) {
+		 if (deltaTime2  >= 0.4) {
 		 	 nbFrames2 = 0;
-		 	 lastTime2 += 0.25;
+		 	 lastTime2 += 0.4;
 		 	 esquerda = 0;
 		 	 direita = 1;
 		 	 KeyboardMovementObject(deltaTime, deltaTime2);
@@ -519,7 +545,9 @@ int main(void)
 		 esquerda = 1;
 		 direita = 0;
 		// Limpa a Tela
-		glClear(GL_COLOR_BUFFER_BIT);
+         if (ativo) {
+		    glClear(GL_COLOR_BUFFER_BIT);
+         }
 
 		// Para definir os Shaders
 		glUseProgram(programID);
@@ -529,7 +557,7 @@ int main(void)
 		//KeyboardMovementObject(deltaTime, deltaTime2);
 		//trackAnimation(deltaTime, deltaTime2);
 		turboAnimation(deltaTime, deltaTime2);
-        if(joguinho == false) {
+        if(joguinho == false && ativo == false) {
 			drawModel(verticesTelaInicial, MatrizCombinada, MatrixID, 0.0, 0.0, 0.0);
 			char telaInicial[256];
 			sprintf(telaInicial,"CAR RACE");
@@ -545,15 +573,15 @@ int main(void)
 		if (deltaTime  >= 0.04 ){ // If last prinf() was more than 5 sec ago
 		 	 nbFrames = 0;
 			if(ativo) {
-				//trackAnimation();
-				trackAnimation2();
+				trackAnimation();
+				// trackAnimation2();
 			}
 			 lastTime += 0.04;
 		}
 
 		if(joguinho) {
 			MatrizCombinada = glm::mat3(1.0f);
-			drawModel(verticesPistas, MatrizCombinada, MatrixID, 0.0, 0.0, 0.0);
+			drawModel(verticesPistas, MatrizCombinada, MatrixID, pistaRed, pistaGreen, pistaBlue);
 			MatrizCombinada = pistaMovement;
 			drawModel(verticesMuro, MatrizCombinada, MatrixID, 0.4, 0.4, 0.4);
 			drawModel(verticesFaixas, MatrizCombinada, MatrixID, 1.0, 1.0, 1.0);
@@ -566,20 +594,20 @@ int main(void)
  			glm::vec4 carrinhoTwo = getCarrinhoBox(verticesCar2);
 
 			//Som Colisão, Score, GAMEOVER
-			if(intersect(carrinhoOne, carrinhoTwo, translation, objectTranslation)) {
+			if(intersect(carrinhoOne, carrinhoTwo, translation, objectTranslation) || (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)) {
 				glClear(GL_COLOR_BUFFER_BIT);
                 killSong();
 		        FMOD_Config(MediaPath("gameOver.mp3"));
                 drawModel(verticesTelaFinal, MatrizCombinada, MatrixID, 0.0, 0.0, 0.0);
                 char telaFinal[256];
                 sprintf(telaFinal,"GAME OVER");
-                printText2D(telaFinal, 100, 300, 70);
+                printText2D(telaFinal, 130, 350, 70);
 
                 joguinho = false;
-                ativo = false;
-			} 
+                // ativo = false;
+			}
 
-			
+
             char text[256];
 			TwDraw();
 			sprintf(text,"Score: %d",score);
