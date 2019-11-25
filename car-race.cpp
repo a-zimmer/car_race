@@ -28,7 +28,7 @@ using namespace glm;
 typedef enum { SHAPE_TEAPOT=1, SHAPE_TORUS, SHAPE_CONE } Shape;
 Shape g_CurrentShape = SHAPE_TORUS;
 
-const GLint WIDTH = 800, HEIGHT = 800;
+const GLint WIDTH = 800, HEIGHT = 600;
 const GLfloat R = 0.0f, G = 0.0f, B = 0.3f, A = 0.0f;
 float CR, CG, CB;
 
@@ -184,7 +184,14 @@ void trackAnimation() {
     		pistaMovement[1][2] = 0.0f;
     		//printf("Pista Move 2\n");
     	}
+}
 
+void trackAnimation2() {
+	if(pistaMovement[1][2] < 0.8 && pistaMovement[1][2] > -0.1) {
+			pistaMovement[1][2] -=0.02;
+	}else{
+		pistaMovement[1][2] = 0.1f;
+	}
 }
 
 void turboAnimation(double deltaTime, double deltaTime2) {
@@ -495,12 +502,13 @@ int main(void)
 			ativo = true;
 		}
 
-		if (deltaTime  >= 0.09 ){ // If last prinf() was more than 5 sec ago
+		if (deltaTime  >= 0.04 ){ // If last prinf() was more than 5 sec ago
 		 	 nbFrames = 0;
 			if(ativo) {
-				trackAnimation();
+				//trackAnimation();
+				trackAnimation2();
 			}
-			 lastTime += 0.09;
+			 lastTime += 0.04;
 		}
 
 		if(joguinho) {
